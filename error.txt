@@ -1,0 +1,7 @@
+Error at line 4: Type Mismatch
+
+Error at Line 7 : Undeclared Variable: b
+
+Error at line 7 : Type Mismatch
+
+Total Errors: 3

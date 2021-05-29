@@ -1,0 +1,9 @@
+void func();
+void func(int a,int b){
+int x;
+}
+void main(int x,int y){
+int a;
+b=10;
+func(10,a);
+}
