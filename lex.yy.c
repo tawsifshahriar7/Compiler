@@ -1322,24 +1322,21 @@ YY_RULE_SETUP
 {
 	SymbolInfo *s= new  SymbolInfo(yytext,"");
 	yylval = (YYSTYPE)s;
-	table->EnterScope();
 	return LCURL;
 }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 359 "1705007.l"
+#line 358 "1705007.l"
 {
 	SymbolInfo *s= new  SymbolInfo(yytext,"");
 	yylval = (YYSTYPE)s;
-	table->PrintAll(fp2);
-	table->ExitScope();
 	return RCURL;
 }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 367 "1705007.l"
+#line 364 "1705007.l"
 {
 	SymbolInfo *s= new  SymbolInfo(yytext,"");
 	yylval = (YYSTYPE)s;
@@ -1348,7 +1345,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 373 "1705007.l"
+#line 370 "1705007.l"
 {
 	SymbolInfo *s= new  SymbolInfo(yytext,"");
 	yylval = (YYSTYPE)s;
@@ -1357,7 +1354,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 379 "1705007.l"
+#line 376 "1705007.l"
 {
 	SymbolInfo *s= new  SymbolInfo(yytext,"");
 	yylval = (YYSTYPE)s;
@@ -1366,7 +1363,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 385 "1705007.l"
+#line 382 "1705007.l"
 {
 	SymbolInfo *s= new  SymbolInfo(yytext,"");
 	yylval = (YYSTYPE)s;
@@ -1375,7 +1372,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 392 "1705007.l"
+#line 389 "1705007.l"
 {
 	SymbolInfo *s= new  SymbolInfo(yytext, (char *)"CONST_INT");
 	yylval = (YYSTYPE)s;
@@ -1384,7 +1381,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 398 "1705007.l"
+#line 395 "1705007.l"
 {
 	SymbolInfo *s= new  SymbolInfo(yytext, (char *)"CONST_FLOAT");
 	yylval = (YYSTYPE)s;
@@ -1393,7 +1390,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 404 "1705007.l"
+#line 401 "1705007.l"
 {
 	string str=yytext;
 	str=formatting(str);
@@ -1405,26 +1402,29 @@ YY_RULE_SETUP
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 413 "1705007.l"
+#line 410 "1705007.l"
 {
 	error_count++;
 	fprintf(fp3,"Error at line no %d: Too many decimal points %s\n\n",yylineno,yytext);
+	fprintf(fp2,"Error at line no %d: Too many decimal points %s\n\n",yylineno,yytext);
 }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 418 "1705007.l"
+#line 416 "1705007.l"
 {
 	error_count++;
 	fprintf(fp3,"Error at line no %d: Ill formed number %s\n\n",yylineno,yytext);
+	fprintf(fp2,"Error at line no %d: Ill formed number %s\n\n",yylineno,yytext);
 }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 423 "1705007.l"
+#line 422 "1705007.l"
 {
 	error_count++;
 	fprintf(fp3,"Error at line no %d: Invalid prefix on ID or invalid suffix on Number %s\n\n",yylineno,yytext);
+	fprintf(fp2,"Error at line no %d: Invalid prefix on ID or invalid suffix on Number %s\n\n",yylineno,yytext);
 }
 	YY_BREAK
 case 47:
@@ -1433,27 +1433,30 @@ YY_RULE_SETUP
 {
 	error_count++;
 	fprintf(fp3,"Error at line no %d: Multi character constant error %s\n\n",yylineno,yytext);
+	fprintf(fp2,"Error at line no %d: Multi character constant error %s\n\n",yylineno,yytext);
 }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 433 "1705007.l"
+#line 434 "1705007.l"
 {
 	error_count++;
 	fprintf(fp3,"Error at line no %d: Empty character constant error %s\n\n",yylineno,yytext);
+	fprintf(fp2,"Error at line no %d: Empty character constant error %s\n\n",yylineno,yytext);
 }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 438 "1705007.l"
+#line 440 "1705007.l"
 {
 	error_count++;
 	fprintf(fp3,"Error at line no %d: Unterminated character %s\n\n",yylineno,yytext);
+	fprintf(fp2,"Error at line no %d: Unterminated character %s\n\n",yylineno,yytext);
 }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 443 "1705007.l"
+#line 446 "1705007.l"
 {
 	SymbolInfo *s= new  SymbolInfo(yytext, (char *)"ID");
 	yylval = (YYSTYPE)s;
@@ -1462,24 +1465,25 @@ YY_RULE_SETUP
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 448 "1705007.l"
+#line 451 "1705007.l"
 {
 	error_count++;
 	fprintf(fp3,"Error at line no %d: Unrecognized character  %s\n\n",yylineno,yytext);
+	fprintf(fp2,"Error at line no %d: Unrecognized character  %s\n\n",yylineno,yytext);
 }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 452 "1705007.l"
+#line 456 "1705007.l"
 {
 	return 0;
 }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 455 "1705007.l"
+#line 459 "1705007.l"
 ECHO;
 	YY_BREAK
-#line 1483 "lex.yy.c"
+#line 1487 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2494,7 +2498,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 455 "1705007.l"
+#line 459 "1705007.l"
 
 
 int yywrap(void)

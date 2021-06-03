@@ -1,7 +1,49 @@
-Error at line 4: Type Mismatch
+Error at line 20: Multiple declaration of a in parameter
 
-Error at Line 7 : Undeclared Variable: b
+Error at line 24: Return type mismatch with function declaration in function foo3
 
-Error at line 7 : Type Mismatch
+Error at line 28: Multiple declaration of z
 
-Total Errors: 3
+Error at line 32: Total number of arguments mismatch with declaration in function var
+
+Error at line 42: Variable type cannot be void
+
+Error at Line 43: Multiple Declaration of a
+
+Error at Line 43: Multiple Declaration of c
+
+Error at Line 45 : 1th argument mismatch in function func
+
+Error at Line 48 : Type mismatch, c is an array
+
+Error at Line 48 : 2th argument mismatch in function correct_foo
+
+Error at Line 49 : Total number of arguments mismatch with declaration in function correct_foo
+
+Error at Line 51 : Undeclared Variable: k
+
+Error at line 51 : Type Mismatch
+
+Error at Line 52 : Type Mismatch,b not an array
+
+Error at Line 53 : Non-integer Array Index
+
+Error at Line 54 : Void function used in expression
+
+Error at Line 57 : Void function used in expression
+
+Error at line 58 : Type Mismatch
+
+Error at Line 59 : Modulus by zero
+
+Error at Line 60 : Non-integer operand on modulus operator
+
+Error at Line 62 : Undeclared Variable: foo5
+
+Error at line 62 : Type Mismatch
+
+Error at Line 67 : Undeclared Variable: h
+
+Error at Line 67 : Undeclared Variable: printf
+
+Total Errors: 24

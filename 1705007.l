@@ -352,15 +352,12 @@ STRING ["]
 {LCURL} {
 	SymbolInfo *s= new  SymbolInfo(yytext,"");
 	yylval = (YYSTYPE)s;
-	table->EnterScope();
 	return LCURL;
 }
 
 {RCURL} {
 	SymbolInfo *s= new  SymbolInfo(yytext,"");
 	yylval = (YYSTYPE)s;
-	table->PrintAll(fp2);
-	table->ExitScope();
 	return RCURL;
 }
 
@@ -413,31 +410,37 @@ STRING ["]
 {TOOMANYPOINT} {
 	error_count++;
 	fprintf(fp3,"Error at line no %d: Too many decimal points %s\n\n",yylineno,yytext);
+	fprintf(fp2,"Error at line no %d: Too many decimal points %s\n\n",yylineno,yytext);
 }
 
 {ILLFORM} {
 	error_count++;
 	fprintf(fp3,"Error at line no %d: Ill formed number %s\n\n",yylineno,yytext);
+	fprintf(fp2,"Error at line no %d: Ill formed number %s\n\n",yylineno,yytext);
 }
 
 {INVALIDID} {
 	error_count++;
 	fprintf(fp3,"Error at line no %d: Invalid prefix on ID or invalid suffix on Number %s\n\n",yylineno,yytext);
+	fprintf(fp2,"Error at line no %d: Invalid prefix on ID or invalid suffix on Number %s\n\n",yylineno,yytext);
 }
 
 {MULTICHAR} {
 	error_count++;
 	fprintf(fp3,"Error at line no %d: Multi character constant error %s\n\n",yylineno,yytext);
+	fprintf(fp2,"Error at line no %d: Multi character constant error %s\n\n",yylineno,yytext);
 }
 
 {EMPTYCHAR} {
 	error_count++;
 	fprintf(fp3,"Error at line no %d: Empty character constant error %s\n\n",yylineno,yytext);
+	fprintf(fp2,"Error at line no %d: Empty character constant error %s\n\n",yylineno,yytext);
 }
 
 {UNFINISHEDCHAR} {
 	error_count++;
 	fprintf(fp3,"Error at line no %d: Unterminated character %s\n\n",yylineno,yytext);
+	fprintf(fp2,"Error at line no %d: Unterminated character %s\n\n",yylineno,yytext);
 }
 
 {ID} {
@@ -448,6 +451,7 @@ STRING ["]
 . {
 	error_count++;
 	fprintf(fp3,"Error at line no %d: Unrecognized character  %s\n\n",yylineno,yytext);
+	fprintf(fp2,"Error at line no %d: Unrecognized character  %s\n\n",yylineno,yytext);
 }
 <<EOF>> {
 	return 0;

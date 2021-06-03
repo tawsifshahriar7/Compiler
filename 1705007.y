@@ -15,6 +15,9 @@ extern int error_count;
 SymbolTable *table;
 FILE* fp2;
 FILE* fp3;
+int func_flag=0;
+int has_param=0;
+string current_param;
 
 void yyerror(char *s)
 {
@@ -87,78 +90,115 @@ unit: var_declaration
 		$$=$1;
 	 }
      ;
-     
-func_declaration: type_specifier ID LPAREN parameter_list RPAREN SEMICOLON
+
+func_start: type_specifier ID LPAREN parameter_list RPAREN
 	{
-		bool res = table->Insert($2->getName(),$2->getType());
+		has_param=1;
+		bool res = table->Insert($2->getName(),"ID");
 		if(!res){
-			error_count++;
-			fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,$2->getName().c_str());
-		}
-		fprintf(fp2,"At line no %d: func_declaration: type_specifier ID LPAREN parameter_list RPAREN SEMICOLON\n\n",yylineno);
-		$$->setName($1->getName()+" "+$2->getName()+"("+$4->getName()+")"+";");
-		fprintf(fp2,"%s\n\n",$$->getName().c_str());
-		table->Lookup($2->getName())->isFunc=true;
-		table->Lookup($2->getName())->datatype=$1->getName();
-		table->Lookup($2->getName())->param_list=param_parse($4->getName());
-	}
-		| type_specifier ID LPAREN RPAREN SEMICOLON
-		{
-			bool res = table->Insert($2->getName(),$2->getType());
-			if(!res){
+			if(table->Lookup($2->getName())->isFunc!=true){
 				error_count++;
-				fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,$2->getName().c_str());
+				fprintf(fp3,"Error at line %d: Multiple declaration of %s\n\n",yylineno,$2->getName().c_str());
 			}
-			fprintf(fp2,"At line no %d: func_declaration: type_specifier ID LPAREN RPAREN SEMICOLON\n\n",yylineno);
-			$$->setName($1->getName()+" "+$2->getName()+"("+")"+";");
-			fprintf(fp2,"%s\n\n",$$->getName().c_str());
-			table->Lookup($2->getName())->isFunc=true;
-			table->Lookup($2->getName())->datatype=$1->getName();
-		}
-		;
-		 
-func_definition: type_specifier ID LPAREN parameter_list RPAREN compound_statement
-	{
-		if(table->Lookup($2->getName())!=nullptr && table->Lookup($2->getName())->isFunc==true){
-			vector<string> def_param=table->Lookup($2->getName())->param_list;
-			vector<string> imp_param=param_parse($4->getName());
-			if(def_param.size()!=imp_param.size()){
+			if($1->getName()!=table->Lookup($2->getName())->datatype){
 				error_count++;
-				fprintf(fp3,"Error at line %d: Type Mismatch\n\n",yylineno);
+				fprintf(fp3,"Error at line %d: Return type mismatch with function declaration in function %s\n\n",yylineno,$2->getName().c_str());
 			}
-			else{
-				for(int i=0;i<def_param.size();i++){
-					if(def_param[i]!=imp_param[i]){
-						error_count++;
-						fprintf(fp3,"Error at line %d: Type Mismatch\n\n",yylineno);
+			if(table->Lookup($2->getName())->isFunc==true){
+				vector<string> def_param=table->Lookup($2->getName())->param_list;
+				vector<string> imp_param=param_parse($4->getName());
+				if(def_param.size()!=imp_param.size()){
+					error_count++;
+					fprintf(fp3,"Error at line %d: Total number of arguments mismatch with declaration in function %s\n\n",yylineno,$2->getName().c_str());
+				}
+				else{
+					for(int i=0;i<def_param.size();i++){
+						if(def_param[i]!=imp_param[i]){
+							error_count++;
+							fprintf(fp3,"Error at line %d: Parameter list for function declaration and definition do not match\n\n",yylineno);
+						}
 					}
 				}
 			}
 		}
-		table->Insert($2->getName(),$2->getType());
-		fprintf(fp2,"At line no %d: func_definition: type_specifier ID LPAREN parameter_list RPAREN compound_statement\n\n",yylineno);
-		$$->setName($1->getName()+" "+$2->getName()+"("+$4->getName()+")"+$6->getName());
-		fprintf(fp2,"%s\n\n",$$->getName().c_str());
-		table->Lookup($2->getName())->isFunc=true;
-		table->Lookup($2->getName())->datatype=$1->getName();
-		table->Lookup($2->getName())->param_list=param_parse($4->getName());
-	}
-		| type_specifier ID LPAREN RPAREN compound_statement
-		{
-			if(table->Lookup($2->getName())!=nullptr && table->Lookup($2->getName())->isFunc==true){
-			vector<string> def_param=table->Lookup($2->getName())->param_list;
-			if(def_param.size()!=0){
-				error_count++;
-				fprintf(fp3,"Error at line %d: Type Mismatch\n\n",yylineno);
-			}
-		}
-			table->Insert($2->getName(),$2->getType());
-			fprintf(fp2,"At line no %d: func_declaration: type_specifier ID LPAREN RPAREN compound_statement\n\n",yylineno);
-			$$->setName($1->getName()+" "+$2->getName()+"("+")"+$5->getName());
-			fprintf(fp2,"%s\n\n",$$->getName().c_str());
+		else{
+			table->Lookup($2->getName())->param_list=param_parse($4->getName());
 			table->Lookup($2->getName())->isFunc=true;
 			table->Lookup($2->getName())->datatype=$1->getName();
 		}
+		current_param = $4->getName();
+		$$->setName($1->getName()+" "+$2->getName()+" ("+$4->getName()+")");
+		func_flag=1;
+	}
+	| type_specifier ID LPAREN RPAREN
+	{
+		has_param=0;
+		bool res = table->Insert($2->getName(),"ID");
+		if(!res){
+			if(table->Lookup($2->getName())->isFunc!=true){
+				error_count++;
+				fprintf(fp3,"Error at line %d: Multiple declaration of %s\n\n",yylineno,$2->getName().c_str());
+			}
+			if(table->Lookup($2->getName())->param_list.size()!=0){
+				error_count++;
+				fprintf(fp3,"Error at line %d: Parameter list for function declaration and definition do not match\n\n",yylineno);
+			}
+		}
+		else{
+			table->Lookup($2->getName())->isFunc=true;
+			table->Lookup($2->getName())->datatype=$1->getName();
+		}
+		$$->setName($1->getName()+" "+$2->getName()+" ()");
+		func_flag=1;
+	}
+	;
+
+
+func_declaration: type_specifier ID LPAREN parameter_list RPAREN SEMICOLON
+	{
+		bool res = table->Insert($2->getName(),"ID");
+		if(!res){
+			error_count++;
+			fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,$2->getName().c_str());
+		}
+		else{
+			table->Lookup($2->getName())->isFunc=true;
+			table->Lookup($2->getName())->datatype=$1->getName();
+			table->Lookup($2->getName())->param_list=param_parse($4->getName());
+		}
+		fprintf(fp2,"At line no %d: func_declaration: type_specifier ID LPAREN parameter_list RPAREN SEMICOLON\n\n",yylineno);
+		$$->setName($1->getName()+" "+$2->getName()+"("+$4->getName()+")"+";");
+		fprintf(fp2,"%s\n\n",$$->getName().c_str());
+	}
+		| type_specifier ID LPAREN RPAREN SEMICOLON
+		{
+			bool res = table->Insert($2->getName(),"ID");
+			if(!res){
+				error_count++;
+				fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,$2->getName().c_str());
+			}
+			else{
+				table->Lookup($2->getName())->isFunc=true;
+				table->Lookup($2->getName())->datatype=$1->getName();
+			}
+			fprintf(fp2,"At line no %d: func_declaration: type_specifier ID LPAREN RPAREN SEMICOLON\n\n",yylineno);
+			$$->setName($1->getName()+" "+$2->getName()+"("+")"+";");
+			fprintf(fp2,"%s\n\n",$$->getName().c_str());
+		}
+		;
+		 
+func_definition: func_start compound_statement
+	{
+		
+		if(has_param==1){
+			fprintf(fp2,"At line no %d: func_definition: type_specifier ID LPAREN parameter_list RPAREN compound_statement\n\n",yylineno);
+		}
+		else{
+			fprintf(fp2,"At line no %d: func_definition: type_specifier ID LPAREN RPAREN compound_statement\n\n",yylineno);
+		}
+		 $$->setName($1->getName()+" "+$2->getName());
+		 fprintf(fp2,"%s\n\n",$$->getName().c_str());
+	}
  		;				
 
 
@@ -188,20 +228,55 @@ parameter_list: parameter_list COMMA type_specifier ID
  		;
 
  		
-compound_statement: LCURL statements RCURL
+compound_statement: compound_statement_start statements RCURL
 	{
 		fprintf(fp2,"At line no %d: compound_statement: LCURL statements RCURL\n\n",yylineno);
 		$$->setName("{\n"+$2->getName()+"\n}");
 		fprintf(fp2,"%s\n\n",$$->getName().c_str());
+		table->PrintAll(fp2);
+		table->ExitScope();
+		func_flag=0;
+		current_param="";
 	}
- 		    | LCURL RCURL
+ 		    | compound_statement_start RCURL
 			 {
 				fprintf(fp2,"At line no %d: compound_statement: LCURL RCURL\n\n",yylineno);
 				$$->setName("{\n}");
 				fprintf(fp2,"%s\n\n",$$->getName().c_str());
+				table->PrintAll(fp2);
+				table->ExitScope();
+				func_flag=0;
+				current_param="";
 			 }
  		    ;
- 		    
+compound_statement_start: LCURL
+	{
+		table->EnterScope();
+		if(func_flag==1){
+			vector<string> tokens;
+			stringstream temp(current_param);
+			string intermediate;
+			while(getline(temp,intermediate,',')){
+				tokens.push_back(intermediate);
+			}
+			for(int i=0;i<tokens.size();i++){
+				stringstream strm(tokens[i]);
+				getline(strm,intermediate,' ');
+				string type = intermediate;
+				getline(strm,intermediate,' ');
+				string name = intermediate;
+				bool res = table->Insert(name,"ID");
+				if(!res){
+					error_count++;
+					fprintf(fp3,"Error at line %d: Multiple declaration of %s in parameter\n\n",yylineno,name.c_str());
+				}
+				else{
+					table->Lookup(name)->datatype=type;
+				}
+			}
+		}
+	}
+	;
 var_declaration: type_specifier declaration_list SEMICOLON
 	{
 		vector <string> tokens;
@@ -222,7 +297,13 @@ var_declaration: type_specifier declaration_list SEMICOLON
 			}
 		}
 		for(int i=0;i<tokens.size();i++){
-			table->Lookup(tokens[i])->datatype=$1->getName();
+			if(table->Lookup(tokens[i])->multiDec==false){
+				table->Lookup(tokens[i])->datatype=$1->getName();
+			}
+		}
+		if($1->getName()=="void"){
+			error_count++;
+			fprintf(fp3,"Error at line %d: Variable type cannot be void\n\n",yylineno);
 		}
 		fprintf(fp2,"At line no %d: var_declaration: type_specifier declaration_list SEMICOLON\n\n",yylineno);
 		$$->setName($1->getName()+" "+$2->getName()+";");
@@ -251,6 +332,7 @@ declaration_list: declaration_list COMMA ID
 	{
 		bool res = table->Insert($3->getName(),$3->getType());
 		if(!res){
+			table->Lookup($3->getName())->multiDec=true;
 			error_count++;
 			fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,$3->getName().c_str());
 		}
@@ -262,8 +344,12 @@ declaration_list: declaration_list COMMA ID
 		   {
 			   bool res = table->Insert($3->getName(),$3->getType());
 				if(!res){
+					table->Lookup($3->getName())->multiDec=true;
 					error_count++;
 					fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,$3->getName().c_str());
+				}
+				else{
+					table->Lookup($3->getName())->isArray=true;
 				}
 			   	fprintf(fp2,"At line no %d: declaration_list: declaration_list COMMA ID LTHIRD CONST_INT RTHIRD\n\n",yylineno);
 				$$->setName($1->getName()+","+$3->getName()+"["+$5->getName()+"]");
@@ -273,6 +359,7 @@ declaration_list: declaration_list COMMA ID
 		   {
 			   	bool res = table->Insert($1->getName(),$1->getType());
 				if(!res){
+					table->Lookup($1->getName())->multiDec=true;
 					error_count++;
 					fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,$1->getName().c_str());
 				}
@@ -281,10 +368,15 @@ declaration_list: declaration_list COMMA ID
 		   }
  		  | ID LTHIRD CONST_INT RTHIRD
 		   {
+			   table->PrintAll(fp2);
 			   bool res = table->Insert($1->getName(),$1->getType());
 				if(!res){
+					table->Lookup($1->getName())->multiDec=true;
 					error_count++;
 					fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,$1->getName().c_str());
+				}
+				else{
+					table->Lookup($1->getName())->isArray=true;
 				}
 			   	fprintf(fp2,"At line no %d: declaration_list: ID LTHIRD CONST_INT RTHIRD\n\n",yylineno);
 				$$->setName($1->getName()+"["+$3->getName()+"]");
@@ -379,9 +471,9 @@ variable: ID
 	}
 	else{
 		$$->datatype=table->Lookup($1->getName())->datatype;
-		if(table->Lookup($1->getName())->isArray==true || table->Lookup($1->getName())->isFunc==true){
+		if(table->Lookup($1->getName())->isArray==true){
 			error_count++;
-			fprintf(fp3,"Error at Line %d : Type Mismatch\n\n",yylineno);
+			fprintf(fp3,"Error at Line %d : Type mismatch, %s is an array\n\n",yylineno,$1->getName().c_str());
 		}
 	}
 	fprintf(fp2,"At line no %d: variable: ID\n\n",yylineno);
@@ -394,9 +486,10 @@ variable: ID
 			fprintf(fp3,"Error at Line %d : Undeclared Variable: %s\n\n",yylineno,$1->getName().c_str());
 		}
 		else{
-			if(table->Lookup($1->getName())->isArray==false || table->Lookup($1->getName())->isFunc==true){
-			error_count++;
-			fprintf(fp3,"Error at Line %d : Type Mismatch\n\n",yylineno);
+			$$->datatype=table->Lookup($1->getName())->datatype;
+			if(table->Lookup($1->getName())->isArray==false){
+				error_count++;
+				fprintf(fp3,"Error at Line %d : Type Mismatch,%s not an array\n\n",yylineno,$1->getName().c_str());
 			}
 		}
 		if($3->datatype!="int"){
@@ -417,7 +510,14 @@ expression: logic_expression
 	}
 	   | variable ASSIGNOP logic_expression 
 	   {
-		   	if($1->datatype!=$3->datatype){
+		   if($1->datatype=="float"&&($3->datatype=="int" || $3->datatype=="float")){
+			   $$->datatype="float";
+		   }
+		   else if($3->datatype=="void"){
+			   error_count++;
+			   fprintf(fp3,"Error at Line %d : Void function used in expression\n\n",yylineno);
+		   }
+		   	else if($1->datatype!=$3->datatype){
 				error_count++;
 			   	fprintf(fp3,"Error at line %d : Type Mismatch\n\n",yylineno);
 		   	}
@@ -438,6 +538,10 @@ logic_expression: rel_expression
 	}
 		 | rel_expression LOGICOP rel_expression 
 		 {
+			 if($1->datatype!="void" || $3->datatype!="void"){
+				error_count++;
+				fprintf(fp3,"Error at Line %d : Void expression used with Logical operation\n\n",yylineno);
+			}
 			fprintf(fp2,"At line no %d: logic_expression: rel_expression LOGICOP rel_expression\n\n",yylineno);
 			$$->setName($1->getName()+$2->getName()+$3->getName());
 			$$->datatype="int";
@@ -453,6 +557,10 @@ rel_expression: simple_expression
 	}
 		| simple_expression RELOP simple_expression	
 		{
+			if($1->datatype!="void" || $3->datatype!="void"){
+				error_count++;
+				fprintf(fp3,"Error at Line %d : Void expression used with Relational operation\n\n",yylineno);
+			}
 			fprintf(fp2,"At line no %d: rel_expression: simple_expression RELOP simple_expression\n\n",yylineno);
 			$$->setName($1->getName()+$2->getName()+$3->getName());
 			$$->datatype="int";
@@ -488,6 +596,10 @@ term:	unary_expression
 	}
      |  term MULOP unary_expression
 	 {
+		 	if($3->datatype=="void"){
+				error_count++;
+				fprintf(fp3,"Error at Line %d : Void function used in expression\n\n",yylineno);
+			}
 		 	fprintf(fp2,"At line no %d: term: term MULOP unary_expression\n\n",yylineno);
 			$$->setName($1->getName()+$2->getName()+$3->getName());
 			if($1->datatype=="float"||$3->datatype=="float"){
@@ -503,12 +615,21 @@ term:	unary_expression
 					fprintf(fp3,"Error at Line %d : Non-integer operand on modulus operator\n\n",yylineno);
 					$$->datatype="int";
 				}
+				else if($3->getName()=="0"){
+					error_count++;
+					fprintf(fp3,"Error at Line %d : Modulus by zero\n\n",yylineno);
+					$$->datatype="int";
+				}
 			}
 	 }
      ;
 
 unary_expression: ADDOP unary_expression  
 	{
+		if($2->datatype=="void"){
+			error_count++;
+			fprintf(fp3,"Error at Line %d : Void function used in expression\n\n",yylineno);
+		}
 		fprintf(fp2,"At line no %d: unary_expression: ADDOP unary_expression\n\n",yylineno);
 		$$->setName($1->getName()+$2->getName());
 		fprintf(fp2,"%s\n\n",$$->getName().c_str());
@@ -516,6 +637,10 @@ unary_expression: ADDOP unary_expression
 	}
 		 | NOT unary_expression 
 		 {
+			if($2->datatype=="void"){
+				error_count++;
+				fprintf(fp3,"Error at Line %d : Void function used in expression\n\n",yylineno);
+			}
 			fprintf(fp2,"At line no %d: unary_expression: NOT unary_expression\n\n",yylineno);
 			$$->setName($1->getName()+$2->getName());
 			fprintf(fp2,"%s\n\n",$$->getName().c_str());
@@ -539,24 +664,25 @@ factor: variable
 	{
 		if(table->Lookup($1->getName())==nullptr){
 			error_count++;
-			fprintf(fp3,"Error at Line %d : Undeclared Variable: %s",yylineno,$1->getName().c_str());
+			fprintf(fp3,"Error at Line %d : Undeclared Variable: %s\n\n",yylineno,$1->getName().c_str());
 		}
 		else{
+			$$->datatype=table->Lookup($1->getName())->datatype;
 			if(table->Lookup($1->getName())->isFunc==false){
 				error_count++;
-				fprintf(fp3,"Error at Line %d : Type Mismatch\n\n",yylineno);
+				fprintf(fp3,"Error at Line %d : Function called with non-function type identifier\n\n",yylineno);
 			}
 			vector<string> def_args=table->Lookup($1->getName())->param_list;
 			vector<string> imp_args=$3->param_list;
 			if(def_args.size()!=imp_args.size()){
 				error_count++;
-				fprintf(fp3,"Error at Line %d : Type Mismatch\n\n",yylineno,$1->getName().c_str());
+				fprintf(fp3,"Error at Line %d : Total number of arguments mismatch with declaration in function %s\n\n",yylineno,$1->getName().c_str());
 			}
 			else{
 				for(int i=0;i<def_args.size();i++){
 					if(def_args[i]!=imp_args[i]){
 						error_count++;
-						fprintf(fp3,"Error at Line %d : Type Mismatch\n\n",yylineno,$1->getName().c_str());
+						fprintf(fp3,"Error at Line %d : %dth argument mismatch in function %s\n\n",yylineno,i+1,$1->getName().c_str());
 						break;
 					}
 				}
@@ -569,6 +695,7 @@ factor: variable
 	| LPAREN expression RPAREN
 	{
 		fprintf(fp2,"At line no %d: factor: LPAREN expression RPAREN\n\n",yylineno);
+		$$->datatype=$2->datatype;
 		$$->setName($1->getName()+$2->getName()+$3->getName());
 		fprintf(fp2,"%s\n\n",$$->getName().c_str());
 	}
@@ -587,12 +714,14 @@ factor: variable
 	| variable INCOP
 	{
 		fprintf(fp2,"At line no %d: factor: variable INCOP\n\n",yylineno);
+		$$->datatype=$1->datatype;
 		$$->setName($1->getName()+$2->getName());
 		fprintf(fp2,"%s\n\n",$$->getName().c_str());
 	} 
 	| variable DECOP
 	{
 		fprintf(fp2,"At line no %d: factor: variable DECOP\n\n",yylineno);
+		$$->datatype=$1->datatype;
 		$$->setName($1->getName()+$2->getName());
 		fprintf(fp2,"%s\n\n",$$->getName().c_str());
 	}

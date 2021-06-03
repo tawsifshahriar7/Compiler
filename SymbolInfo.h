@@ -10,11 +10,13 @@ public:
     SymbolInfo* next;
     bool isFunc;
     bool isArray;
+    bool multiDec;
     vector<string> param_list;
     SymbolInfo(string Name,string Type){
         next=nullptr;
         isFunc=false;
         isArray=false;
+        multiDec=false;
         this->Name=Name;
         this->Type=Type;
     }

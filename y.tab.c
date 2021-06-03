@@ -66,7 +66,7 @@
 
 
 /* First part of user prologue.  */
-#line 1 "parser.y"
+#line 1 "1705007.y"
 
 #include<bits/stdc++.h>
 #include "SymbolInfo.h"
@@ -84,6 +84,9 @@ extern int error_count;
 SymbolTable *table;
 FILE* fp2;
 FILE* fp3;
+int func_flag=0;
+int has_param=0;
+string current_param;
 
 void yyerror(char *s)
 {
@@ -107,7 +110,7 @@ vector<string> param_parse(string str){
 }
 
 
-#line 111 "y.tab.c"
+#line 114 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -547,18 +550,18 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  11
+#define YYFINAL  12
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   178
+#define YYLAST   176
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  39
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  24
+#define YYNNTS  26
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  64
+#define YYNRULES  66
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  118
+#define YYNSTATES  119
 
 #define YYUNDEFTOK  2
 #define YYMAXUTOK   293
@@ -609,13 +612,13 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    49,    49,    57,    63,    71,    77,    83,    91,   105,
-     120,   146,   165,   171,   177,   183,   191,   197,   205,   233,
-     238,   243,   250,   261,   272,   282,   295,   300,   308,   313,
-     318,   323,   329,   335,   341,   347,   353,   361,   366,   374,
-     390,   412,   418,   433,   439,   448,   454,   463,   469,   483,
-     489,   510,   517,   524,   532,   538,   569,   575,   581,   587,
-     593,   601,   607,   610,   618
+       0,    52,    52,    60,    66,    74,    80,    86,    94,   133,
+     157,   173,   190,   205,   211,   217,   223,   231,   241,   252,
+     280,   314,   319,   324,   331,   343,   358,   369,   387,   392,
+     400,   405,   410,   415,   421,   427,   433,   439,   445,   453,
+     458,   466,   482,   505,   511,   533,   539,   552,   558,   571,
+     577,   591,   597,   627,   638,   649,   657,   663,   695,   702,
+     708,   714,   721,   730,   736,   739,   747
 };
 #endif
 
@@ -630,12 +633,12 @@ static const char *const yytname[] =
   "NOT", "LPAREN", "RPAREN", "LCURL", "RCURL", "LTHIRD", "RTHIRD", "COMMA",
   "SEMICOLON", "ID", "CONST_INT", "CONST_FLOAT", "CONST_CHAR", "STRING",
   "PRINTLN", "DECOP", "LOW_ELSE", "$accept", "start", "program", "unit",
-  "func_declaration", "func_definition", "parameter_list",
-  "compound_statement", "var_declaration", "type_specifier",
-  "declaration_list", "statements", "statement", "expression_statement",
-  "variable", "expression", "logic_expression", "rel_expression",
-  "simple_expression", "term", "unary_expression", "factor",
-  "argument_list", "arguments", YY_NULLPTR
+  "func_start", "func_declaration", "func_definition", "parameter_list",
+  "compound_statement", "compound_statement_start", "var_declaration",
+  "type_specifier", "declaration_list", "statements", "statement",
+  "expression_statement", "variable", "expression", "logic_expression",
+  "rel_expression", "simple_expression", "term", "unary_expression",
+  "factor", "argument_list", "arguments", YY_NULLPTR
 };
 #endif
 
@@ -651,7 +654,7 @@ static const yytype_int16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF (-68)
+#define YYPACT_NINF (-48)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -665,18 +668,18 @@ static const yytype_int16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-      54,   -68,   -68,   -68,    12,    54,   -68,   -68,   -68,   -68,
-     -21,   -68,   -68,    26,    58,    10,    -6,    21,   -68,    -9,
-       1,    23,    13,    30,    69,   -68,   -68,    -2,    54,   -68,
-     -68,    33,    55,    60,    61,    28,    28,    28,    28,   -68,
-     -68,    40,   -68,   -68,    63,   -68,   -68,    49,   101,   -68,
-     -68,    -5,    59,   -68,    72,    57,    73,   -68,   -68,   -68,
-     -68,    65,    70,    28,   145,    28,    67,    -1,   -68,   -68,
-      79,    28,    28,    77,    83,   -68,   -68,   -68,    28,   -68,
-     -68,    28,    28,    28,    28,   -68,   -68,    88,   145,    91,
-     -68,   -68,   -68,    92,    89,    93,    95,   -68,   -68,    73,
-     104,   -68,   133,    28,   133,   -68,    28,   -68,    98,   118,
-     105,   -68,   -68,   -68,   133,   133,   -68,   -68
+      20,   -48,   -48,   -48,    42,    20,   -48,    -5,   -48,   -48,
+     -48,    13,   -48,   -48,   -48,   -48,    67,    16,     7,    34,
+      35,    37,    -7,    -7,    -7,    -7,   -48,   -48,    22,   -48,
+     -48,    38,   -48,   -48,    31,    99,   -48,   -48,    -6,    33,
+     -48,    44,    40,    50,   -48,   -48,     9,    36,    43,   -48,
+      -7,   143,    -7,    39,   -14,   -48,   -48,    47,    -7,    -7,
+      45,    51,   -48,   -48,   -48,    -7,   -48,   -48,    -7,    -7,
+      -7,    -7,    54,    -2,    55,    60,    64,    71,   143,    72,
+     -48,   -48,   -48,    77,    79,    78,    86,   -48,   -48,    50,
+      97,   -48,   -48,    84,    20,   -48,   -48,    85,   131,    -7,
+     131,   -48,    -7,   -48,    88,   -48,    89,    91,   112,   102,
+     -48,   -48,   -48,   -48,   -48,   131,   131,   -48,   -48
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -684,34 +687,34 @@ static const yytype_int16 yypact[] =
      means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       0,    19,    20,    21,     0,     2,     4,     6,     7,     5,
-       0,     1,     3,    24,     0,     0,     0,     0,    18,     0,
-       0,    15,     0,    22,     0,     9,    11,     0,     0,    14,
-      25,     0,     0,     0,     0,     0,     0,     0,     0,    17,
-      37,    39,    57,    58,     0,    30,    28,     0,     0,    26,
-      29,    54,     0,    41,    43,    45,    47,    49,    53,     8,
-      10,    13,     0,     0,     0,     0,     0,    54,    51,    52,
-       0,    62,     0,     0,    24,    16,    27,    59,     0,    60,
-      38,     0,     0,     0,     0,    12,    23,     0,     0,     0,
-      36,    56,    64,     0,    61,     0,     0,    42,    44,    48,
-      46,    50,     0,     0,     0,    55,     0,    40,     0,    32,
-       0,    34,    63,    35,     0,     0,    33,    31
+       0,    21,    22,    23,     0,     2,     4,     0,     6,     7,
+       5,     0,     1,     3,    19,    12,     0,    26,     0,     0,
+       0,     0,     0,     0,     0,     0,    18,    39,    41,    59,
+      60,     0,    32,    30,     0,     0,    28,    31,    56,     0,
+      43,    45,    47,    49,    51,    55,     0,     0,     0,    20,
+       0,     0,     0,     0,    56,    53,    54,     0,    64,     0,
+       0,    26,    17,    29,    61,     0,    62,    40,     0,     0,
+       0,     0,     9,     0,    16,     0,    24,     0,     0,     0,
+      38,    58,    66,     0,    63,     0,     0,    44,    46,    50,
+      48,    52,    11,     8,     0,    15,    27,     0,     0,     0,
+       0,    57,     0,    42,     0,    10,    14,     0,    34,     0,
+      36,    65,    37,    13,    25,     0,     0,    35,    33
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -68,   -68,   -68,   120,   -68,   -68,   -68,     0,    38,     9,
-     -68,   -68,   -46,   -59,   -36,   -32,   -67,    66,    47,    53,
-     -29,   -68,   -68,   -68
+     -48,   -48,   -48,   118,   -48,   -48,   -48,   -48,   120,   -48,
+      29,     0,   -48,   -48,   -34,   -43,   -17,   -12,   -47,    65,
+      58,    69,   -21,   -48,   -48,   -48
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     4,     5,     6,     7,     8,    20,    45,    46,    47,
-      14,    48,    49,    50,    51,    52,    53,    54,    55,    56,
-      57,    58,    93,    94
+      -1,     4,     5,     6,     7,     8,     9,    73,    32,    16,
+      33,    34,    18,    35,    36,    37,    38,    39,    40,    41,
+      42,    43,    44,    45,    83,    84
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -719,88 +722,88 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      67,    67,    76,    66,    92,    88,    70,    68,    69,    10,
-      13,    97,    11,    77,    10,    78,    24,    77,     1,    26,
-       2,    25,     3,    24,    21,    27,    22,    60,    59,   103,
-      28,    87,    79,    89,    19,    67,    79,    61,     9,   112,
-      95,    30,    67,     9,    36,    67,    67,    67,    67,    15,
-      37,    38,    23,    16,    29,   101,   109,    31,   111,    41,
-      42,    43,     1,    71,     2,    62,     3,    72,   116,   117,
-      67,   110,    32,    82,    33,    34,    83,     1,    63,     2,
-      74,     3,    35,    64,    65,    36,    73,    17,    18,    80,
-      84,    37,    38,    81,    24,    39,    85,    90,    86,    40,
-      41,    42,    43,    91,    32,    44,    33,    34,    96,     1,
-      16,     2,   102,     3,    35,   104,   105,    36,   106,   108,
-      82,   107,   114,    37,    38,    12,    24,    75,   113,   115,
-     100,    40,    41,    42,    43,    99,    32,    44,    33,    34,
-       0,     1,     0,     2,     0,     3,    35,    98,     0,    36,
-       0,     0,     0,     0,     0,    37,    38,     0,    24,     0,
-       0,    36,     0,    40,    41,    42,    43,    37,    38,    44,
-       0,     0,     0,     0,     0,    40,    41,    42,    43
+      11,    63,    55,    56,    64,    11,    54,    54,    78,    23,
+      53,    82,    64,    57,    65,    24,    25,     1,    87,     2,
+      14,     3,    93,    66,    28,    29,    30,    94,     1,    10,
+       2,    66,     3,    72,    10,    99,    48,    49,    77,    46,
+      79,    54,    12,    47,    17,    58,    74,    85,    54,    59,
+      91,    54,    54,    54,    54,   111,    69,    50,    51,    70,
+      52,    60,    61,    67,   108,    68,   110,    71,    75,    80,
+      19,    81,    20,    21,    76,     1,    86,     2,    47,     3,
+      22,   117,   118,    23,    92,    54,    95,   109,    96,    24,
+      25,    97,    14,    26,   106,    98,   100,    27,    28,    29,
+      30,   101,    19,    31,    20,    21,   103,     1,   102,     2,
+     104,     3,    22,    69,   105,    23,   115,   107,   112,   114,
+     113,    24,    25,    13,    14,    62,   116,    15,    90,    27,
+      28,    29,    30,    88,    19,    31,    20,    21,    89,     1,
+       0,     2,     0,     3,    22,     0,     0,    23,     0,     0,
+       0,     0,     0,    24,    25,     0,    14,     0,     0,    23,
+       0,    27,    28,    29,    30,    24,    25,    31,     0,     0,
+       0,     0,     0,    27,    28,    29,    30
 };
 
 static const yytype_int8 yycheck[] =
 {
-      36,    37,    48,    35,    71,    64,    38,    36,    37,     0,
-      31,    78,     0,    18,     5,    20,    25,    18,     8,    19,
-      10,    30,    12,    25,    15,    24,    32,    27,    30,    88,
-      29,    63,    37,    65,    24,    71,    37,    28,     0,   106,
-      72,    28,    78,     5,    16,    81,    82,    83,    84,    23,
-      22,    23,    31,    27,    31,    84,   102,    27,   104,    31,
-      32,    33,     8,    23,    10,    32,    12,    27,   114,   115,
-     106,   103,     3,    16,     5,     6,    19,     8,    23,    10,
-      31,    12,    13,    23,    23,    16,    23,    29,    30,    30,
-      17,    22,    23,    21,    25,    26,    31,    30,    28,    30,
-      31,    32,    33,    24,     3,    36,     5,     6,    31,     8,
-      27,    10,    24,    12,    13,    24,    24,    16,    29,    24,
-      16,    28,     4,    22,    23,     5,    25,    26,    30,    24,
-      83,    30,    31,    32,    33,    82,     3,    36,     5,     6,
-      -1,     8,    -1,    10,    -1,    12,    13,    81,    -1,    16,
-      -1,    -1,    -1,    -1,    -1,    22,    23,    -1,    25,    -1,
-      -1,    16,    -1,    30,    31,    32,    33,    22,    23,    36,
-      -1,    -1,    -1,    -1,    -1,    30,    31,    32,    33
+       0,    35,    23,    24,    18,     5,    23,    24,    51,    16,
+      22,    58,    18,    25,    20,    22,    23,     8,    65,    10,
+      25,    12,    24,    37,    31,    32,    33,    29,     8,     0,
+      10,    37,    12,    24,     5,    78,    29,    30,    50,    23,
+      52,    58,     0,    27,    31,    23,    46,    59,    65,    27,
+      71,    68,    69,    70,    71,   102,    16,    23,    23,    19,
+      23,    23,    31,    30,    98,    21,   100,    17,    32,    30,
+       3,    24,     5,     6,    31,     8,    31,    10,    27,    12,
+      13,   115,   116,    16,    30,   102,    31,    99,    28,    22,
+      23,    27,    25,    26,    94,    24,    24,    30,    31,    32,
+      33,    24,     3,    36,     5,     6,    28,     8,    29,    10,
+      24,    12,    13,    16,    30,    16,     4,    32,    30,    28,
+      31,    22,    23,     5,    25,    26,    24,     7,    70,    30,
+      31,    32,    33,    68,     3,    36,     5,     6,    69,     8,
+      -1,    10,    -1,    12,    13,    -1,    -1,    16,    -1,    -1,
+      -1,    -1,    -1,    22,    23,    -1,    25,    -1,    -1,    16,
+      -1,    30,    31,    32,    33,    22,    23,    36,    -1,    -1,
+      -1,    -1,    -1,    30,    31,    32,    33
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     8,    10,    12,    40,    41,    42,    43,    44,    47,
-      48,     0,    42,    31,    49,    23,    27,    29,    30,    24,
-      45,    48,    32,    31,    25,    30,    46,    24,    29,    31,
-      28,    27,     3,     5,     6,    13,    16,    22,    23,    26,
-      30,    31,    32,    33,    36,    46,    47,    48,    50,    51,
-      52,    53,    54,    55,    56,    57,    58,    59,    60,    30,
-      46,    48,    32,    23,    23,    23,    54,    53,    59,    59,
-      54,    23,    27,    23,    31,    26,    51,    18,    20,    37,
-      30,    21,    16,    19,    17,    31,    28,    54,    52,    54,
-      30,    24,    55,    61,    62,    54,    31,    55,    56,    58,
-      57,    59,    24,    52,    24,    24,    29,    28,    24,    51,
-      54,    51,    55,    30,     4,    24,    51,    51
+       0,     8,    10,    12,    40,    41,    42,    43,    44,    45,
+      49,    50,     0,    42,    25,    47,    48,    31,    51,     3,
+       5,     6,    13,    16,    22,    23,    26,    30,    31,    32,
+      33,    36,    47,    49,    50,    52,    53,    54,    55,    56,
+      57,    58,    59,    60,    61,    62,    23,    27,    29,    30,
+      23,    23,    23,    56,    55,    61,    61,    56,    23,    27,
+      23,    31,    26,    53,    18,    20,    37,    30,    21,    16,
+      19,    17,    24,    46,    50,    32,    31,    56,    54,    56,
+      30,    24,    57,    63,    64,    56,    31,    57,    58,    60,
+      59,    61,    30,    24,    29,    31,    28,    27,    24,    54,
+      24,    24,    29,    28,    24,    30,    50,    32,    53,    56,
+      53,    57,    30,    31,    28,     4,    24,    53,    53
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_int8 yyr1[] =
 {
        0,    39,    40,    41,    41,    42,    42,    42,    43,    43,
-      44,    44,    45,    45,    45,    45,    46,    46,    47,    48,
-      48,    48,    49,    49,    49,    49,    50,    50,    51,    51,
-      51,    51,    51,    51,    51,    51,    51,    52,    52,    53,
-      53,    54,    54,    55,    55,    56,    56,    57,    57,    58,
-      58,    59,    59,    59,    60,    60,    60,    60,    60,    60,
-      60,    61,    61,    62,    62
+      44,    44,    45,    46,    46,    46,    46,    47,    47,    48,
+      49,    50,    50,    50,    51,    51,    51,    51,    52,    52,
+      53,    53,    53,    53,    53,    53,    53,    53,    53,    54,
+      54,    55,    55,    56,    56,    57,    57,    58,    58,    59,
+      59,    60,    60,    61,    61,    61,    62,    62,    62,    62,
+      62,    62,    62,    63,    63,    64,    64
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     1,     2,     1,     1,     1,     1,     6,     5,
-       6,     5,     4,     3,     2,     1,     3,     2,     3,     1,
-       1,     1,     3,     6,     1,     4,     1,     2,     1,     1,
-       1,     7,     5,     7,     5,     5,     3,     1,     2,     1,
-       4,     1,     3,     1,     3,     1,     3,     1,     3,     1,
-       3,     2,     2,     1,     1,     4,     3,     1,     1,     2,
-       2,     1,     0,     3,     1
+       0,     2,     1,     2,     1,     1,     1,     1,     5,     4,
+       6,     5,     2,     4,     3,     2,     1,     3,     2,     1,
+       3,     1,     1,     1,     3,     6,     1,     4,     1,     2,
+       1,     1,     1,     7,     5,     7,     5,     5,     3,     1,
+       2,     1,     4,     1,     3,     1,     3,     1,     3,     1,
+       3,     1,     3,     2,     2,     1,     1,     4,     3,     1,
+       1,     2,     2,     1,     0,     3,     1
 };
 
 
@@ -1496,211 +1499,288 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 50 "parser.y"
+#line 53 "1705007.y"
         {
 		table->PrintAll(fp2);
 		fprintf(fp2,"Total Lines: %d\n\nTotal Errors: %d",yylineno,error_count);
 		fprintf(fp3,"Total Errors: %d",error_count);
 	}
-#line 1506 "y.tab.c"
+#line 1509 "y.tab.c"
     break;
 
   case 3:
-#line 58 "parser.y"
+#line 61 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: program: program unit\n\n",yylineno);
 		yyval->setName(yyvsp[-1]->getName()+"\n"+yyvsp[0]->getName());
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 1516 "y.tab.c"
+#line 1519 "y.tab.c"
     break;
 
   case 4:
-#line 64 "parser.y"
+#line 67 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: program: unit\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		yyval=yyvsp[0];
 	}
-#line 1526 "y.tab.c"
+#line 1529 "y.tab.c"
     break;
 
   case 5:
-#line 72 "parser.y"
+#line 75 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: unit: var_declaration\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		yyval=yyvsp[0];
 	}
-#line 1536 "y.tab.c"
+#line 1539 "y.tab.c"
     break;
 
   case 6:
-#line 78 "parser.y"
+#line 81 "1705007.y"
          {
 		fprintf(fp2,"At line no %d: unit: func_declaration\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		yyval=yyvsp[0];
 	 }
-#line 1546 "y.tab.c"
+#line 1549 "y.tab.c"
     break;
 
   case 7:
-#line 84 "parser.y"
+#line 87 "1705007.y"
          {
 		fprintf(fp2,"At line no %d: unit: func_definition\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		yyval=yyvsp[0];
 	 }
-#line 1556 "y.tab.c"
+#line 1559 "y.tab.c"
     break;
 
   case 8:
-#line 92 "parser.y"
+#line 95 "1705007.y"
         {
-		bool res = table->Insert(yyvsp[-4]->getName(),yyvsp[-4]->getType());
+		has_param=1;
+		bool res = table->Insert(yyvsp[-3]->getName(),"ID");
 		if(!res){
-			error_count++;
-			fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,yyvsp[-4]->getName().c_str());
-		}
-		fprintf(fp2,"At line no %d: func_declaration: type_specifier ID LPAREN parameter_list RPAREN SEMICOLON\n\n",yylineno);
-		yyval->setName(yyvsp[-5]->getName()+" "+yyvsp[-4]->getName()+"("+yyvsp[-2]->getName()+")"+";");
-		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
-		table->Lookup(yyvsp[-4]->getName())->isFunc=true;
-		table->Lookup(yyvsp[-4]->getName())->datatype=yyvsp[-5]->getName();
-		table->Lookup(yyvsp[-4]->getName())->param_list=param_parse(yyvsp[-2]->getName());
-	}
-#line 1574 "y.tab.c"
-    break;
-
-  case 9:
-#line 106 "parser.y"
-                {
-			bool res = table->Insert(yyvsp[-3]->getName(),yyvsp[-3]->getType());
-			if(!res){
+			if(table->Lookup(yyvsp[-3]->getName())->isFunc!=true){
 				error_count++;
-				fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,yyvsp[-3]->getName().c_str());
+				fprintf(fp3,"Error at line %d: Multiple declaration of %s\n\n",yylineno,yyvsp[-3]->getName().c_str());
 			}
-			fprintf(fp2,"At line no %d: func_declaration: type_specifier ID LPAREN RPAREN SEMICOLON\n\n",yylineno);
-			yyval->setName(yyvsp[-4]->getName()+" "+yyvsp[-3]->getName()+"("+")"+";");
-			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
-			table->Lookup(yyvsp[-3]->getName())->isFunc=true;
-			table->Lookup(yyvsp[-3]->getName())->datatype=yyvsp[-4]->getName();
-		}
-#line 1591 "y.tab.c"
-    break;
-
-  case 10:
-#line 121 "parser.y"
-        {
-		if(table->Lookup(yyvsp[-4]->getName())!=nullptr && table->Lookup(yyvsp[-4]->getName())->isFunc==true){
-			vector<string> def_param=table->Lookup(yyvsp[-4]->getName())->param_list;
-			vector<string> imp_param=param_parse(yyvsp[-2]->getName());
-			if(def_param.size()!=imp_param.size()){
+			if(yyvsp[-4]->getName()!=table->Lookup(yyvsp[-3]->getName())->datatype){
 				error_count++;
-				fprintf(fp3,"Error at line %d: Type Mismatch\n\n",yylineno);
+				fprintf(fp3,"Error at line %d: Return type mismatch with function declaration in function %s\n\n",yylineno,yyvsp[-3]->getName().c_str());
 			}
-			else{
-				for(int i=0;i<def_param.size();i++){
-					if(def_param[i]!=imp_param[i]){
-						error_count++;
-						fprintf(fp3,"Error at line %d: Type Mismatch\n\n",yylineno);
+			if(table->Lookup(yyvsp[-3]->getName())->isFunc==true){
+				vector<string> def_param=table->Lookup(yyvsp[-3]->getName())->param_list;
+				vector<string> imp_param=param_parse(yyvsp[-1]->getName());
+				if(def_param.size()!=imp_param.size()){
+					error_count++;
+					fprintf(fp3,"Error at line %d: Total number of arguments mismatch with declaration in function %s\n\n",yylineno,yyvsp[-3]->getName().c_str());
+				}
+				else{
+					for(int i=0;i<def_param.size();i++){
+						if(def_param[i]!=imp_param[i]){
+							error_count++;
+							fprintf(fp3,"Error at line %d: Parameter list for function declaration and definition do not match\n\n",yylineno);
+						}
 					}
 				}
 			}
 		}
-		table->Insert(yyvsp[-4]->getName(),yyvsp[-4]->getType());
-		fprintf(fp2,"At line no %d: func_definition: type_specifier ID LPAREN parameter_list RPAREN compound_statement\n\n",yylineno);
-		yyval->setName(yyvsp[-5]->getName()+" "+yyvsp[-4]->getName()+"("+yyvsp[-2]->getName()+")"+yyvsp[0]->getName());
-		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
-		table->Lookup(yyvsp[-4]->getName())->isFunc=true;
-		table->Lookup(yyvsp[-4]->getName())->datatype=yyvsp[-5]->getName();
-		table->Lookup(yyvsp[-4]->getName())->param_list=param_parse(yyvsp[-2]->getName());
-	}
-#line 1621 "y.tab.c"
-    break;
-
-  case 11:
-#line 147 "parser.y"
-                {
-			if(table->Lookup(yyvsp[-3]->getName())!=nullptr && table->Lookup(yyvsp[-3]->getName())->isFunc==true){
-			vector<string> def_param=table->Lookup(yyvsp[-3]->getName())->param_list;
-			if(def_param.size()!=0){
-				error_count++;
-				fprintf(fp3,"Error at line %d: Type Mismatch\n\n",yylineno);
-			}
-		}
-			table->Insert(yyvsp[-3]->getName(),yyvsp[-3]->getType());
-			fprintf(fp2,"At line no %d: func_declaration: type_specifier ID LPAREN RPAREN compound_statement\n\n",yylineno);
-			yyval->setName(yyvsp[-4]->getName()+" "+yyvsp[-3]->getName()+"("+")"+yyvsp[0]->getName());
-			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
+		else{
+			table->Lookup(yyvsp[-3]->getName())->param_list=param_parse(yyvsp[-1]->getName());
 			table->Lookup(yyvsp[-3]->getName())->isFunc=true;
 			table->Lookup(yyvsp[-3]->getName())->datatype=yyvsp[-4]->getName();
 		}
-#line 1641 "y.tab.c"
+		current_param = yyvsp[-1]->getName();
+		yyval->setName(yyvsp[-4]->getName()+" "+yyvsp[-3]->getName()+" ("+yyvsp[-1]->getName()+")");
+		func_flag=1;
+	}
+#line 1602 "y.tab.c"
+    break;
+
+  case 9:
+#line 134 "1705007.y"
+        {
+		has_param=0;
+		bool res = table->Insert(yyvsp[-2]->getName(),"ID");
+		if(!res){
+			if(table->Lookup(yyvsp[-2]->getName())->isFunc!=true){
+				error_count++;
+				fprintf(fp3,"Error at line %d: Multiple declaration of %s\n\n",yylineno,yyvsp[-2]->getName().c_str());
+			}
+			if(table->Lookup(yyvsp[-2]->getName())->param_list.size()!=0){
+				error_count++;
+				fprintf(fp3,"Error at line %d: Parameter list for function declaration and definition do not match\n\n",yylineno);
+			}
+		}
+		else{
+			table->Lookup(yyvsp[-2]->getName())->isFunc=true;
+			table->Lookup(yyvsp[-2]->getName())->datatype=yyvsp[-3]->getName();
+		}
+		yyval->setName(yyvsp[-3]->getName()+" "+yyvsp[-2]->getName()+" ()");
+		func_flag=1;
+	}
+#line 1627 "y.tab.c"
+    break;
+
+  case 10:
+#line 158 "1705007.y"
+        {
+		bool res = table->Insert(yyvsp[-4]->getName(),"ID");
+		if(!res){
+			error_count++;
+			fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,yyvsp[-4]->getName().c_str());
+		}
+		else{
+			table->Lookup(yyvsp[-4]->getName())->isFunc=true;
+			table->Lookup(yyvsp[-4]->getName())->datatype=yyvsp[-5]->getName();
+			table->Lookup(yyvsp[-4]->getName())->param_list=param_parse(yyvsp[-2]->getName());
+		}
+		fprintf(fp2,"At line no %d: func_declaration: type_specifier ID LPAREN parameter_list RPAREN SEMICOLON\n\n",yylineno);
+		yyval->setName(yyvsp[-5]->getName()+" "+yyvsp[-4]->getName()+"("+yyvsp[-2]->getName()+")"+";");
+		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
+	}
+#line 1647 "y.tab.c"
+    break;
+
+  case 11:
+#line 174 "1705007.y"
+                {
+			bool res = table->Insert(yyvsp[-3]->getName(),"ID");
+			if(!res){
+				error_count++;
+				fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,yyvsp[-3]->getName().c_str());
+			}
+			else{
+				table->Lookup(yyvsp[-3]->getName())->isFunc=true;
+				table->Lookup(yyvsp[-3]->getName())->datatype=yyvsp[-4]->getName();
+			}
+			fprintf(fp2,"At line no %d: func_declaration: type_specifier ID LPAREN RPAREN SEMICOLON\n\n",yylineno);
+			yyval->setName(yyvsp[-4]->getName()+" "+yyvsp[-3]->getName()+"("+")"+";");
+			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
+		}
+#line 1666 "y.tab.c"
     break;
 
   case 12:
-#line 166 "parser.y"
+#line 191 "1705007.y"
+        {
+		
+		if(has_param==1){
+			fprintf(fp2,"At line no %d: func_definition: type_specifier ID LPAREN parameter_list RPAREN compound_statement\n\n",yylineno);
+		}
+		else{
+			fprintf(fp2,"At line no %d: func_definition: type_specifier ID LPAREN RPAREN compound_statement\n\n",yylineno);
+		}
+		 yyval->setName(yyvsp[-1]->getName()+" "+yyvsp[0]->getName());
+		 fprintf(fp2,"%s\n\n",yyval->getName().c_str());
+	}
+#line 1682 "y.tab.c"
+    break;
+
+  case 13:
+#line 206 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: parameter_list: parameter_list COMMA type_specifier ID\n\n",yylineno);
 		yyval->setName(yyvsp[-3]->getName()+","+yyvsp[-1]->getName()+" "+yyvsp[0]->getName());
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 1651 "y.tab.c"
+#line 1692 "y.tab.c"
     break;
 
-  case 13:
-#line 172 "parser.y"
+  case 14:
+#line 212 "1705007.y"
                 {
 			fprintf(fp2,"At line no %d: parameter_list: parameter_list COMMA type_specifier\n\n",yylineno);
 			yyval->setName(yyvsp[-2]->getName()+","+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 		}
-#line 1661 "y.tab.c"
+#line 1702 "y.tab.c"
     break;
 
-  case 14:
-#line 178 "parser.y"
+  case 15:
+#line 218 "1705007.y"
                  {
 			fprintf(fp2,"At line no %d: parameter_list: type_specifier ID\n\n",yylineno);
 			yyval->setName(yyvsp[-1]->getName()+" "+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 		 }
-#line 1671 "y.tab.c"
+#line 1712 "y.tab.c"
     break;
 
-  case 15:
-#line 184 "parser.y"
+  case 16:
+#line 224 "1705007.y"
                 {
 			fprintf(fp2,"At line no %d: parameter_list: type_specifier\n\n",yylineno);
 			fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		}
-#line 1680 "y.tab.c"
+#line 1721 "y.tab.c"
     break;
 
-  case 16:
-#line 192 "parser.y"
+  case 17:
+#line 232 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: compound_statement: LCURL statements RCURL\n\n",yylineno);
 		yyval->setName("{\n"+yyvsp[-1]->getName()+"\n}");
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
+		table->PrintAll(fp2);
+		table->ExitScope();
+		func_flag=0;
+		current_param="";
 	}
-#line 1690 "y.tab.c"
+#line 1735 "y.tab.c"
     break;
 
-  case 17:
-#line 198 "parser.y"
+  case 18:
+#line 242 "1705007.y"
                          {
 				fprintf(fp2,"At line no %d: compound_statement: LCURL RCURL\n\n",yylineno);
 				yyval->setName("{\n}");
 				fprintf(fp2,"%s\n\n",yyval->getName().c_str());
+				table->PrintAll(fp2);
+				table->ExitScope();
+				func_flag=0;
+				current_param="";
 			 }
-#line 1700 "y.tab.c"
+#line 1749 "y.tab.c"
     break;
 
-  case 18:
-#line 206 "parser.y"
+  case 19:
+#line 253 "1705007.y"
+        {
+		table->EnterScope();
+		if(func_flag==1){
+			vector<string> tokens;
+			stringstream temp(current_param);
+			string intermediate;
+			while(getline(temp,intermediate,',')){
+				tokens.push_back(intermediate);
+			}
+			for(int i=0;i<tokens.size();i++){
+				stringstream strm(tokens[i]);
+				getline(strm,intermediate,' ');
+				string type = intermediate;
+				getline(strm,intermediate,' ');
+				string name = intermediate;
+				bool res = table->Insert(name,"ID");
+				if(!res){
+					error_count++;
+					fprintf(fp3,"Error at line %d: Multiple declaration of %s in parameter\n\n",yylineno,name.c_str());
+				}
+				else{
+					table->Lookup(name)->datatype=type;
+				}
+			}
+		}
+	}
+#line 1780 "y.tab.c"
+    break;
+
+  case 20:
+#line 281 "1705007.y"
         {
 		vector <string> tokens;
 		stringstream check1(yyvsp[-1]->getName());
@@ -1720,47 +1800,54 @@ yyreduce:
 			}
 		}
 		for(int i=0;i<tokens.size();i++){
-			table->Lookup(tokens[i])->datatype=yyvsp[-2]->getName();
+			if(table->Lookup(tokens[i])->multiDec==false){
+				table->Lookup(tokens[i])->datatype=yyvsp[-2]->getName();
+			}
+		}
+		if(yyvsp[-2]->getName()=="void"){
+			error_count++;
+			fprintf(fp3,"Error at line %d: Variable type cannot be void\n\n",yylineno);
 		}
 		fprintf(fp2,"At line no %d: var_declaration: type_specifier declaration_list SEMICOLON\n\n",yylineno);
 		yyval->setName(yyvsp[-2]->getName()+" "+yyvsp[-1]->getName()+";");
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 1730 "y.tab.c"
+#line 1816 "y.tab.c"
     break;
 
-  case 19:
-#line 234 "parser.y"
+  case 21:
+#line 315 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: type_specifier : INT\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	}
-#line 1739 "y.tab.c"
+#line 1825 "y.tab.c"
     break;
 
-  case 20:
-#line 239 "parser.y"
+  case 22:
+#line 320 "1705007.y"
                  {
 			fprintf(fp2,"At line no %d: type_specifier : FLOAT\n\n",yylineno);
 			fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		 }
-#line 1748 "y.tab.c"
+#line 1834 "y.tab.c"
     break;
 
-  case 21:
-#line 244 "parser.y"
+  case 23:
+#line 325 "1705007.y"
                  {
 			fprintf(fp2,"At line no %d: type_specifier : VOID\n\n",yylineno);
 			fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		 }
-#line 1757 "y.tab.c"
+#line 1843 "y.tab.c"
     break;
 
-  case 22:
-#line 251 "parser.y"
+  case 24:
+#line 332 "1705007.y"
         {
 		bool res = table->Insert(yyvsp[0]->getName(),yyvsp[0]->getType());
 		if(!res){
+			table->Lookup(yyvsp[0]->getName())->multiDec=true;
 			error_count++;
 			fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,yyvsp[0]->getName().c_str());
 		}
@@ -1768,180 +1855,190 @@ yyreduce:
 		yyval->setName(yyvsp[-2]->getName()+","+yyvsp[0]->getName());
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 1772 "y.tab.c"
+#line 1859 "y.tab.c"
     break;
 
-  case 23:
-#line 262 "parser.y"
+  case 25:
+#line 344 "1705007.y"
                    {
 			   bool res = table->Insert(yyvsp[-3]->getName(),yyvsp[-3]->getType());
 				if(!res){
+					table->Lookup(yyvsp[-3]->getName())->multiDec=true;
 					error_count++;
 					fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,yyvsp[-3]->getName().c_str());
+				}
+				else{
+					table->Lookup(yyvsp[-3]->getName())->isArray=true;
 				}
 			   	fprintf(fp2,"At line no %d: declaration_list: declaration_list COMMA ID LTHIRD CONST_INT RTHIRD\n\n",yylineno);
 				yyval->setName(yyvsp[-5]->getName()+","+yyvsp[-3]->getName()+"["+yyvsp[-1]->getName()+"]");
 				fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 		   }
-#line 1787 "y.tab.c"
+#line 1878 "y.tab.c"
     break;
 
-  case 24:
-#line 273 "parser.y"
+  case 26:
+#line 359 "1705007.y"
                    {
 			   	bool res = table->Insert(yyvsp[0]->getName(),yyvsp[0]->getType());
 				if(!res){
+					table->Lookup(yyvsp[0]->getName())->multiDec=true;
 					error_count++;
 					fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,yyvsp[0]->getName().c_str());
 				}
 			   	fprintf(fp2,"At line no %d: declaration_list: ID\n\n",yylineno);
 				fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		   }
-#line 1801 "y.tab.c"
+#line 1893 "y.tab.c"
     break;
 
-  case 25:
-#line 283 "parser.y"
+  case 27:
+#line 370 "1705007.y"
                    {
+			   table->PrintAll(fp2);
 			   bool res = table->Insert(yyvsp[-3]->getName(),yyvsp[-3]->getType());
 				if(!res){
+					table->Lookup(yyvsp[-3]->getName())->multiDec=true;
 					error_count++;
 					fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,yyvsp[-3]->getName().c_str());
+				}
+				else{
+					table->Lookup(yyvsp[-3]->getName())->isArray=true;
 				}
 			   	fprintf(fp2,"At line no %d: declaration_list: ID LTHIRD CONST_INT RTHIRD\n\n",yylineno);
 				yyval->setName(yyvsp[-3]->getName()+"["+yyvsp[-1]->getName()+"]");
 				fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 		   }
-#line 1816 "y.tab.c"
+#line 1913 "y.tab.c"
     break;
 
-  case 26:
-#line 296 "parser.y"
+  case 28:
+#line 388 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: statements: statement\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	}
-#line 1825 "y.tab.c"
+#line 1922 "y.tab.c"
     break;
 
-  case 27:
-#line 301 "parser.y"
+  case 29:
+#line 393 "1705007.y"
            {
 		   	fprintf(fp2,"At line no %d: statements: statements statement\n\n",yylineno);
 			yyval->setName(yyvsp[-1]->getName()+"\n"+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	   }
-#line 1835 "y.tab.c"
+#line 1932 "y.tab.c"
     break;
 
-  case 28:
-#line 309 "parser.y"
+  case 30:
+#line 401 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: statement: var_declaration\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	}
-#line 1844 "y.tab.c"
+#line 1941 "y.tab.c"
     break;
 
-  case 29:
-#line 314 "parser.y"
+  case 31:
+#line 406 "1705007.y"
           {
 		  	fprintf(fp2,"At line no %d: statement: expression_statement\n\n",yylineno);
 			fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	  }
-#line 1853 "y.tab.c"
+#line 1950 "y.tab.c"
     break;
 
-  case 30:
-#line 319 "parser.y"
+  case 32:
+#line 411 "1705007.y"
           {
 		  	fprintf(fp2,"At line no %d: statement: compound_statement\n\n",yylineno);
 			fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	  }
-#line 1862 "y.tab.c"
+#line 1959 "y.tab.c"
     break;
 
-  case 31:
-#line 324 "parser.y"
+  case 33:
+#line 416 "1705007.y"
           {
 		  	fprintf(fp2,"At line no %d: statement: FOR LPAREN expression_statement expression_statement expression RPAREN statement\n\n",yylineno);
 			yyval->setName(yyvsp[-6]->getName()+"("+yyvsp[-4]->getName()+yyvsp[-3]->getName()+yyvsp[-2]->getName()+")"+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	  }
-#line 1872 "y.tab.c"
+#line 1969 "y.tab.c"
     break;
 
-  case 32:
-#line 330 "parser.y"
+  case 34:
+#line 422 "1705007.y"
           {
 		  	fprintf(fp2,"At line no %d: statement: IF LPAREN expression RPAREN statement\n\n",yylineno);
 			yyval->setName(yyvsp[-4]->getName()+"("+yyvsp[-2]->getName()+")"+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	  }
-#line 1882 "y.tab.c"
+#line 1979 "y.tab.c"
     break;
 
-  case 33:
-#line 336 "parser.y"
+  case 35:
+#line 428 "1705007.y"
           {
 		  	fprintf(fp2,"At line no %d: statement: IF LPAREN expression RPAREN statement ELSE statement\n\n",yylineno);
 			yyval->setName(yyvsp[-6]->getName()+"("+yyvsp[-4]->getName()+")"+yyvsp[-2]->getName()+yyvsp[-1]->getName()+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	  }
-#line 1892 "y.tab.c"
+#line 1989 "y.tab.c"
     break;
 
-  case 34:
-#line 342 "parser.y"
+  case 36:
+#line 434 "1705007.y"
           {
 		  	fprintf(fp2,"At line no %d: statement: WHILE LPAREN expression RPAREN statement\n\n",yylineno);
 			yyval->setName(yyvsp[-4]->getName()+"("+yyvsp[-2]->getName()+")"+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	  }
-#line 1902 "y.tab.c"
+#line 1999 "y.tab.c"
     break;
 
-  case 35:
-#line 348 "parser.y"
+  case 37:
+#line 440 "1705007.y"
           {
 		  	fprintf(fp2,"At line no %d: statement: PRINTLN LPAREN ID RPAREN SEMICOLON\n\n",yylineno);
 			yyval->setName(yyvsp[-4]->getName()+"("+yyvsp[-2]->getName()+")"+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	  }
-#line 1912 "y.tab.c"
+#line 2009 "y.tab.c"
     break;
 
-  case 36:
-#line 354 "parser.y"
+  case 38:
+#line 446 "1705007.y"
           {
 		  	fprintf(fp2,"At line no %d: statement: RETURN expression SEMICOLON\n\n",yylineno);
 			yyval->setName(yyvsp[-2]->getName()+" "+yyvsp[-1]->getName()+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	  }
-#line 1922 "y.tab.c"
+#line 2019 "y.tab.c"
     break;
 
-  case 37:
-#line 362 "parser.y"
+  case 39:
+#line 454 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: expression_statement: SEMICOLON\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	}
-#line 1931 "y.tab.c"
+#line 2028 "y.tab.c"
     break;
 
-  case 38:
-#line 367 "parser.y"
+  case 40:
+#line 459 "1705007.y"
                         {
 				fprintf(fp2,"At line no %d: expression_statement: expression SEMICOLON\n\n",yylineno);
 				yyval->setName(yyvsp[-1]->getName()+";");
 				fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 			}
-#line 1941 "y.tab.c"
+#line 2038 "y.tab.c"
     break;
 
-  case 39:
-#line 375 "parser.y"
+  case 41:
+#line 467 "1705007.y"
 {
 	if(table->Lookup(yyvsp[0]->getName())==nullptr){
 		error_count++;
@@ -1949,28 +2046,29 @@ yyreduce:
 	}
 	else{
 		yyval->datatype=table->Lookup(yyvsp[0]->getName())->datatype;
-		if(table->Lookup(yyvsp[0]->getName())->isArray==true || table->Lookup(yyvsp[0]->getName())->isFunc==true){
+		if(table->Lookup(yyvsp[0]->getName())->isArray==true){
 			error_count++;
-			fprintf(fp3,"Error at Line %d : Type Mismatch\n\n",yylineno);
+			fprintf(fp3,"Error at Line %d : Type mismatch, %s is an array\n\n",yylineno,yyvsp[0]->getName().c_str());
 		}
 	}
 	fprintf(fp2,"At line no %d: variable: ID\n\n",yylineno);
 	fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 }
-#line 1961 "y.tab.c"
+#line 2058 "y.tab.c"
     break;
 
-  case 40:
-#line 391 "parser.y"
+  case 42:
+#line 483 "1705007.y"
         {
 		if(table->Lookup(yyvsp[-3]->getName())==nullptr){
 			error_count++;
 			fprintf(fp3,"Error at Line %d : Undeclared Variable: %s\n\n",yylineno,yyvsp[-3]->getName().c_str());
 		}
 		else{
-			if(table->Lookup(yyvsp[-3]->getName())->isArray==false || table->Lookup(yyvsp[-3]->getName())->isFunc==true){
-			error_count++;
-			fprintf(fp3,"Error at Line %d : Type Mismatch\n\n",yylineno);
+			yyval->datatype=table->Lookup(yyvsp[-3]->getName())->datatype;
+			if(table->Lookup(yyvsp[-3]->getName())->isArray==false){
+				error_count++;
+				fprintf(fp3,"Error at Line %d : Type Mismatch,%s not an array\n\n",yylineno,yyvsp[-3]->getName().c_str());
 			}
 		}
 		if(yyvsp[-1]->datatype!="int"){
@@ -1981,23 +2079,30 @@ yyreduce:
 		yyval->setName(yyvsp[-3]->getName()+"["+yyvsp[-1]->getName()+"]");
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 1985 "y.tab.c"
+#line 2083 "y.tab.c"
     break;
 
-  case 41:
-#line 413 "parser.y"
+  case 43:
+#line 506 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: expression: logic_expression\n\n",yylineno);
 		yyval->datatype=yyvsp[0]->datatype;
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	}
-#line 1995 "y.tab.c"
+#line 2093 "y.tab.c"
     break;
 
-  case 42:
-#line 419 "parser.y"
+  case 44:
+#line 512 "1705007.y"
            {
-		   	if(yyvsp[-2]->datatype!=yyvsp[0]->datatype){
+		   if(yyvsp[-2]->datatype=="float"&&(yyvsp[0]->datatype=="int" || yyvsp[0]->datatype=="float")){
+			   yyval->datatype="float";
+		   }
+		   else if(yyvsp[0]->datatype=="void"){
+			   error_count++;
+			   fprintf(fp3,"Error at Line %d : Void function used in expression\n\n",yylineno);
+		   }
+		   	else if(yyvsp[-2]->datatype!=yyvsp[0]->datatype){
 				error_count++;
 			   	fprintf(fp3,"Error at line %d : Type Mismatch\n\n",yylineno);
 		   	}
@@ -2008,63 +2113,71 @@ yyreduce:
 			yyval->setName(yyvsp[-2]->getName()+yyvsp[-1]->getName()+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	   }
-#line 2012 "y.tab.c"
+#line 2117 "y.tab.c"
     break;
 
-  case 43:
-#line 434 "parser.y"
+  case 45:
+#line 534 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: logic_expression: rel_expression\n\n",yylineno);
 		yyval->datatype=yyvsp[0]->datatype;
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	}
-#line 2022 "y.tab.c"
+#line 2127 "y.tab.c"
     break;
 
-  case 44:
-#line 440 "parser.y"
+  case 46:
+#line 540 "1705007.y"
                  {
+			 if(yyvsp[-2]->datatype!="void" || yyvsp[0]->datatype!="void"){
+				error_count++;
+				fprintf(fp3,"Error at Line %d : Void expression used with Logical operation\n\n",yylineno);
+			}
 			fprintf(fp2,"At line no %d: logic_expression: rel_expression LOGICOP rel_expression\n\n",yylineno);
 			yyval->setName(yyvsp[-2]->getName()+yyvsp[-1]->getName()+yyvsp[0]->getName());
 			yyval->datatype="int";
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 		 }
-#line 2033 "y.tab.c"
+#line 2142 "y.tab.c"
     break;
 
-  case 45:
-#line 449 "parser.y"
+  case 47:
+#line 553 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: rel_expression: simple_expression\n\n",yylineno);
 		yyval->datatype=yyvsp[0]->datatype;
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	}
-#line 2043 "y.tab.c"
+#line 2152 "y.tab.c"
     break;
 
-  case 46:
-#line 455 "parser.y"
+  case 48:
+#line 559 "1705007.y"
                 {
+			if(yyvsp[-2]->datatype!="void" || yyvsp[0]->datatype!="void"){
+				error_count++;
+				fprintf(fp3,"Error at Line %d : Void expression used with Relational operation\n\n",yylineno);
+			}
 			fprintf(fp2,"At line no %d: rel_expression: simple_expression RELOP simple_expression\n\n",yylineno);
 			yyval->setName(yyvsp[-2]->getName()+yyvsp[-1]->getName()+yyvsp[0]->getName());
 			yyval->datatype="int";
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 		}
-#line 2054 "y.tab.c"
+#line 2167 "y.tab.c"
     break;
 
-  case 47:
-#line 464 "parser.y"
+  case 49:
+#line 572 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: simple_expression: term\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		yyval->datatype=yyvsp[0]->datatype;
 	}
-#line 2064 "y.tab.c"
+#line 2177 "y.tab.c"
     break;
 
-  case 48:
-#line 470 "parser.y"
+  case 50:
+#line 578 "1705007.y"
                   {
 			  	fprintf(fp2,"At line no %d: simple_expression: simple_expression ADDOP term\n\n",yylineno);
 				yyval->setName(yyvsp[-2]->getName()+yyvsp[-1]->getName()+yyvsp[0]->getName());
@@ -2076,22 +2189,26 @@ yyreduce:
 				}
 				fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 		  }
-#line 2080 "y.tab.c"
+#line 2193 "y.tab.c"
     break;
 
-  case 49:
-#line 484 "parser.y"
+  case 51:
+#line 592 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: term: unary_expression\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		yyval->datatype=yyvsp[0]->datatype;
 	}
-#line 2090 "y.tab.c"
+#line 2203 "y.tab.c"
     break;
 
-  case 50:
-#line 490 "parser.y"
+  case 52:
+#line 598 "1705007.y"
          {
+		 	if(yyvsp[0]->datatype=="void"){
+				error_count++;
+				fprintf(fp3,"Error at Line %d : Void function used in expression\n\n",yylineno);
+			}
 		 	fprintf(fp2,"At line no %d: term: term MULOP unary_expression\n\n",yylineno);
 			yyval->setName(yyvsp[-2]->getName()+yyvsp[-1]->getName()+yyvsp[0]->getName());
 			if(yyvsp[-2]->datatype=="float"||yyvsp[0]->datatype=="float"){
@@ -2107,76 +2224,90 @@ yyreduce:
 					fprintf(fp3,"Error at Line %d : Non-integer operand on modulus operator\n\n",yylineno);
 					yyval->datatype="int";
 				}
+				else if(yyvsp[0]->getName()=="0"){
+					error_count++;
+					fprintf(fp3,"Error at Line %d : Modulus by zero\n\n",yylineno);
+					yyval->datatype="int";
+				}
 			}
 	 }
-#line 2113 "y.tab.c"
+#line 2235 "y.tab.c"
     break;
 
-  case 51:
-#line 511 "parser.y"
+  case 53:
+#line 628 "1705007.y"
         {
+		if(yyvsp[0]->datatype=="void"){
+			error_count++;
+			fprintf(fp3,"Error at Line %d : Void function used in expression\n\n",yylineno);
+		}
 		fprintf(fp2,"At line no %d: unary_expression: ADDOP unary_expression\n\n",yylineno);
 		yyval->setName(yyvsp[-1]->getName()+yyvsp[0]->getName());
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 		yyval->datatype=yyvsp[0]->datatype;
 	}
-#line 2124 "y.tab.c"
+#line 2250 "y.tab.c"
     break;
 
-  case 52:
-#line 518 "parser.y"
+  case 54:
+#line 639 "1705007.y"
                  {
+			if(yyvsp[0]->datatype=="void"){
+				error_count++;
+				fprintf(fp3,"Error at Line %d : Void function used in expression\n\n",yylineno);
+			}
 			fprintf(fp2,"At line no %d: unary_expression: NOT unary_expression\n\n",yylineno);
 			yyval->setName(yyvsp[-1]->getName()+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 			yyval->datatype=yyvsp[0]->datatype;
 		 }
-#line 2135 "y.tab.c"
+#line 2265 "y.tab.c"
     break;
 
-  case 53:
-#line 525 "parser.y"
+  case 55:
+#line 650 "1705007.y"
                  {
 			fprintf(fp2,"At line no %d: unary_expression: factor\n\n",yylineno);
 			fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 			yyval->datatype=yyvsp[0]->datatype;
 		 }
-#line 2145 "y.tab.c"
+#line 2275 "y.tab.c"
     break;
 
-  case 54:
-#line 533 "parser.y"
+  case 56:
+#line 658 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: factor: variable\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		yyval->datatype=yyvsp[0]->datatype;
 	}
-#line 2155 "y.tab.c"
+#line 2285 "y.tab.c"
     break;
 
-  case 55:
-#line 539 "parser.y"
+  case 57:
+#line 664 "1705007.y"
         {
 		if(table->Lookup(yyvsp[-3]->getName())==nullptr){
 			error_count++;
-			fprintf(fp3,"Error at Line %d : Undeclared Variable: %s",yylineno,yyvsp[-3]->getName().c_str());
+			fprintf(fp3,"Error at Line %d : Undeclared Variable: %s\n\n",yylineno,yyvsp[-3]->getName().c_str());
 		}
 		else{
+			yyval->datatype=table->Lookup(yyvsp[-3]->getName())->datatype;
 			if(table->Lookup(yyvsp[-3]->getName())->isFunc==false){
 				error_count++;
-				fprintf(fp3,"Error at Line %d : Type Mismatch\n\n",yylineno);
+				fprintf(fp3,"Error at Line %d : Function called with non-function type identifier\n\n",yylineno);
 			}
 			vector<string> def_args=table->Lookup(yyvsp[-3]->getName())->param_list;
 			vector<string> imp_args=yyvsp[-1]->param_list;
 			if(def_args.size()!=imp_args.size()){
 				error_count++;
-				fprintf(fp3,"Error at Line %d : Type Mismatch\n\n",yylineno,yyvsp[-3]->getName().c_str());
+				fprintf(fp3,"Error at Line %d : Total number of arguments mismatch with declaration in function %s\n\n",yylineno,yyvsp[-3]->getName().c_str());
 			}
 			else{
 				for(int i=0;i<def_args.size();i++){
 					if(def_args[i]!=imp_args[i]){
 						error_count++;
-						fprintf(fp3,"Error at Line %d : Type Mismatch\n\n",yylineno,yyvsp[-3]->getName().c_str());
+						fprintf(fp3,"Error at Line %d : %dth argument mismatch in function %s\n\n",yylineno,i+1,yyvsp[-3]->getName().c_str());
 						break;
 					}
 				}
@@ -2186,71 +2317,74 @@ yyreduce:
 		yyval->setName(yyvsp[-3]->getName()+yyvsp[-2]->getName()+yyvsp[-1]->getName()+yyvsp[0]->getName());
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 2190 "y.tab.c"
+#line 2321 "y.tab.c"
     break;
 
-  case 56:
-#line 570 "parser.y"
+  case 58:
+#line 696 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: factor: LPAREN expression RPAREN\n\n",yylineno);
+		yyval->datatype=yyvsp[-1]->datatype;
 		yyval->setName(yyvsp[-2]->getName()+yyvsp[-1]->getName()+yyvsp[0]->getName());
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 2200 "y.tab.c"
+#line 2332 "y.tab.c"
     break;
 
-  case 57:
-#line 576 "parser.y"
+  case 59:
+#line 703 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: factor: CONST_INT\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		yyval->datatype="int";
 	}
-#line 2210 "y.tab.c"
+#line 2342 "y.tab.c"
     break;
 
-  case 58:
-#line 582 "parser.y"
+  case 60:
+#line 709 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: factor: CONST_FLOAT\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		yyval->datatype="float";
 	}
-#line 2220 "y.tab.c"
-    break;
-
-  case 59:
-#line 588 "parser.y"
-        {
-		fprintf(fp2,"At line no %d: factor: variable INCOP\n\n",yylineno);
-		yyval->setName(yyvsp[-1]->getName()+yyvsp[0]->getName());
-		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
-	}
-#line 2230 "y.tab.c"
-    break;
-
-  case 60:
-#line 594 "parser.y"
-        {
-		fprintf(fp2,"At line no %d: factor: variable DECOP\n\n",yylineno);
-		yyval->setName(yyvsp[-1]->getName()+yyvsp[0]->getName());
-		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
-	}
-#line 2240 "y.tab.c"
+#line 2352 "y.tab.c"
     break;
 
   case 61:
-#line 602 "parser.y"
+#line 715 "1705007.y"
+        {
+		fprintf(fp2,"At line no %d: factor: variable INCOP\n\n",yylineno);
+		yyval->datatype=yyvsp[-1]->datatype;
+		yyval->setName(yyvsp[-1]->getName()+yyvsp[0]->getName());
+		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
+	}
+#line 2363 "y.tab.c"
+    break;
+
+  case 62:
+#line 722 "1705007.y"
+        {
+		fprintf(fp2,"At line no %d: factor: variable DECOP\n\n",yylineno);
+		yyval->datatype=yyvsp[-1]->datatype;
+		yyval->setName(yyvsp[-1]->getName()+yyvsp[0]->getName());
+		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
+	}
+#line 2374 "y.tab.c"
+    break;
+
+  case 63:
+#line 731 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: argument_list: arguments\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		yyval->param_list=yyvsp[0]->param_list;
 	}
-#line 2250 "y.tab.c"
+#line 2384 "y.tab.c"
     break;
 
-  case 63:
-#line 611 "parser.y"
+  case 65:
+#line 740 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: arguments: arguments COMMA logic_expression\n\n",yylineno);
 		yyval->setName(yyvsp[-2]->getName()+yyvsp[-1]->getName()+yyvsp[0]->getName());
@@ -2258,21 +2392,21 @@ yyreduce:
 		yyval->param_list=yyvsp[-2]->param_list;
 		yyval->param_list.push_back(yyvsp[0]->datatype);
 	}
-#line 2262 "y.tab.c"
+#line 2396 "y.tab.c"
     break;
 
-  case 64:
-#line 619 "parser.y"
+  case 66:
+#line 748 "1705007.y"
                   {
 			  	fprintf(fp2,"At line no %d: arguments: logic_expression\n\n",yylineno);
 				fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 				yyval->param_list.push_back(yyvsp[0]->datatype);
 		  }
-#line 2272 "y.tab.c"
+#line 2406 "y.tab.c"
     break;
 
 
-#line 2276 "y.tab.c"
+#line 2410 "y.tab.c"
 
       default: break;
     }
@@ -2504,7 +2638,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 627 "parser.y"
+#line 756 "1705007.y"
 
 int main(int argc,char *argv[])
 {
