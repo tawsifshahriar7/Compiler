@@ -538,7 +538,7 @@ logic_expression: rel_expression
 	}
 		 | rel_expression LOGICOP rel_expression 
 		 {
-			 if($1->datatype!="void" || $3->datatype!="void"){
+			 if($1->datatype=="void" || $3->datatype=="void"){
 				error_count++;
 				fprintf(fp3,"Error at Line %d : Void expression used with Logical operation\n\n",yylineno);
 			}
@@ -557,7 +557,7 @@ rel_expression: simple_expression
 	}
 		| simple_expression RELOP simple_expression	
 		{
-			if($1->datatype!="void" || $3->datatype!="void"){
+			if($1->datatype=="void" || $3->datatype=="void"){
 				error_count++;
 				fprintf(fp3,"Error at Line %d : Void expression used with Relational operation\n\n",yylineno);
 			}

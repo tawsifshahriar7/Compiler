@@ -2129,7 +2129,7 @@ yyreduce:
   case 46:
 #line 540 "1705007.y"
                  {
-			 if(yyvsp[-2]->datatype!="void" || yyvsp[0]->datatype!="void"){
+			 if(yyvsp[-2]->datatype=="void" || yyvsp[0]->datatype=="void"){
 				error_count++;
 				fprintf(fp3,"Error at Line %d : Void expression used with Logical operation\n\n",yylineno);
 			}
@@ -2154,7 +2154,7 @@ yyreduce:
   case 48:
 #line 559 "1705007.y"
                 {
-			if(yyvsp[-2]->datatype!="void" || yyvsp[0]->datatype!="void"){
+			if(yyvsp[-2]->datatype=="void" || yyvsp[0]->datatype=="void"){
 				error_count++;
 				fprintf(fp3,"Error at Line %d : Void expression used with Relational operation\n\n",yylineno);
 			}
