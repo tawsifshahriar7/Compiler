@@ -139,6 +139,10 @@ func_start: type_specifier ID LPAREN parameter_list RPAREN
 				error_count++;
 				fprintf(fp3,"Error at line %d: Multiple declaration of %s\n\n",yylineno,$2->getName().c_str());
 			}
+			if($1->getName()!=table->Lookup($2->getName())->datatype){
+				error_count++;
+				fprintf(fp3,"Error at line %d: Return type mismatch with function declaration in function %s\n\n",yylineno,$2->getName().c_str());
+			}
 			if(table->Lookup($2->getName())->param_list.size()!=0){
 				error_count++;
 				fprintf(fp3,"Error at line %d: Parameter list for function declaration and definition do not match\n\n",yylineno);
@@ -457,6 +461,7 @@ expression_statement: SEMICOLON
 	}			
 			| expression SEMICOLON
 			{
+				$$->datatype = $1->datatype;
 				fprintf(fp2,"At line no %d: expression_statement: expression SEMICOLON\n\n",yylineno);
 				$$->setName($1->getName()+";");
 				fprintf(fp2,"%s\n\n",$$->getName().c_str());
@@ -577,13 +582,13 @@ simple_expression: term
 		  | simple_expression ADDOP term 
 		  {
 			  	fprintf(fp2,"At line no %d: simple_expression: simple_expression ADDOP term\n\n",yylineno);
-				$$->setName($1->getName()+$2->getName()+$3->getName());
 				if($1->datatype=="float"||$3->datatype=="float"){
 					$$->datatype="float";
 				}
 				else{
 					$$->datatype="int";
 				}
+				$$->setName($1->getName()+$2->getName()+$3->getName());
 				fprintf(fp2,"%s\n\n",$$->getName().c_str());
 		  }
 		  ;
@@ -626,6 +631,7 @@ term:	unary_expression
 
 unary_expression: ADDOP unary_expression  
 	{
+		$$->datatype=$2->datatype;
 		if($2->datatype=="void"){
 			error_count++;
 			fprintf(fp3,"Error at Line %d : Void function used in expression\n\n",yylineno);
@@ -633,7 +639,6 @@ unary_expression: ADDOP unary_expression
 		fprintf(fp2,"At line no %d: unary_expression: ADDOP unary_expression\n\n",yylineno);
 		$$->setName($1->getName()+$2->getName());
 		fprintf(fp2,"%s\n\n",$$->getName().c_str());
-		$$->datatype=$2->datatype;
 	}
 		 | NOT unary_expression 
 		 {

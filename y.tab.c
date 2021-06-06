@@ -613,12 +613,12 @@ static const yytype_int8 yytranslate[] =
 static const yytype_int16 yyrline[] =
 {
        0,    52,    52,    60,    66,    74,    80,    86,    94,   133,
-     157,   173,   190,   205,   211,   217,   223,   231,   241,   252,
-     280,   314,   319,   324,   331,   343,   358,   369,   387,   392,
-     400,   405,   410,   415,   421,   427,   433,   439,   445,   453,
-     458,   466,   482,   505,   511,   533,   539,   552,   558,   571,
-     577,   591,   597,   627,   638,   649,   657,   663,   695,   702,
-     708,   714,   721,   730,   736,   739,   747
+     161,   177,   194,   209,   215,   221,   227,   235,   245,   256,
+     284,   318,   323,   328,   335,   347,   362,   373,   391,   396,
+     404,   409,   414,   419,   425,   431,   437,   443,   449,   457,
+     462,   471,   487,   510,   516,   538,   544,   557,   563,   576,
+     582,   596,   602,   632,   643,   654,   662,   668,   700,   707,
+     713,   719,   726,   735,   741,   744,   752
 };
 #endif
 
@@ -1611,6 +1611,10 @@ yyreduce:
 				error_count++;
 				fprintf(fp3,"Error at line %d: Multiple declaration of %s\n\n",yylineno,yyvsp[-2]->getName().c_str());
 			}
+			if(yyvsp[-3]->getName()!=table->Lookup(yyvsp[-2]->getName())->datatype){
+				error_count++;
+				fprintf(fp3,"Error at line %d: Return type mismatch with function declaration in function %s\n\n",yylineno,yyvsp[-2]->getName().c_str());
+			}
 			if(table->Lookup(yyvsp[-2]->getName())->param_list.size()!=0){
 				error_count++;
 				fprintf(fp3,"Error at line %d: Parameter list for function declaration and definition do not match\n\n",yylineno);
@@ -1623,11 +1627,11 @@ yyreduce:
 		yyval->setName(yyvsp[-3]->getName()+" "+yyvsp[-2]->getName()+" ()");
 		func_flag=1;
 	}
-#line 1627 "y.tab.c"
+#line 1631 "y.tab.c"
     break;
 
   case 10:
-#line 158 "1705007.y"
+#line 162 "1705007.y"
         {
 		bool res = table->Insert(yyvsp[-4]->getName(),"ID");
 		if(!res){
@@ -1643,11 +1647,11 @@ yyreduce:
 		yyval->setName(yyvsp[-5]->getName()+" "+yyvsp[-4]->getName()+"("+yyvsp[-2]->getName()+")"+";");
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 1647 "y.tab.c"
+#line 1651 "y.tab.c"
     break;
 
   case 11:
-#line 174 "1705007.y"
+#line 178 "1705007.y"
                 {
 			bool res = table->Insert(yyvsp[-3]->getName(),"ID");
 			if(!res){
@@ -1662,11 +1666,11 @@ yyreduce:
 			yyval->setName(yyvsp[-4]->getName()+" "+yyvsp[-3]->getName()+"("+")"+";");
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 		}
-#line 1666 "y.tab.c"
+#line 1670 "y.tab.c"
     break;
 
   case 12:
-#line 191 "1705007.y"
+#line 195 "1705007.y"
         {
 		
 		if(has_param==1){
@@ -1678,50 +1682,50 @@ yyreduce:
 		 yyval->setName(yyvsp[-1]->getName()+" "+yyvsp[0]->getName());
 		 fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 1682 "y.tab.c"
+#line 1686 "y.tab.c"
     break;
 
   case 13:
-#line 206 "1705007.y"
+#line 210 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: parameter_list: parameter_list COMMA type_specifier ID\n\n",yylineno);
 		yyval->setName(yyvsp[-3]->getName()+","+yyvsp[-1]->getName()+" "+yyvsp[0]->getName());
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 1692 "y.tab.c"
+#line 1696 "y.tab.c"
     break;
 
   case 14:
-#line 212 "1705007.y"
+#line 216 "1705007.y"
                 {
 			fprintf(fp2,"At line no %d: parameter_list: parameter_list COMMA type_specifier\n\n",yylineno);
 			yyval->setName(yyvsp[-2]->getName()+","+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 		}
-#line 1702 "y.tab.c"
+#line 1706 "y.tab.c"
     break;
 
   case 15:
-#line 218 "1705007.y"
+#line 222 "1705007.y"
                  {
 			fprintf(fp2,"At line no %d: parameter_list: type_specifier ID\n\n",yylineno);
 			yyval->setName(yyvsp[-1]->getName()+" "+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 		 }
-#line 1712 "y.tab.c"
+#line 1716 "y.tab.c"
     break;
 
   case 16:
-#line 224 "1705007.y"
+#line 228 "1705007.y"
                 {
 			fprintf(fp2,"At line no %d: parameter_list: type_specifier\n\n",yylineno);
 			fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		}
-#line 1721 "y.tab.c"
+#line 1725 "y.tab.c"
     break;
 
   case 17:
-#line 232 "1705007.y"
+#line 236 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: compound_statement: LCURL statements RCURL\n\n",yylineno);
 		yyval->setName("{\n"+yyvsp[-1]->getName()+"\n}");
@@ -1731,11 +1735,11 @@ yyreduce:
 		func_flag=0;
 		current_param="";
 	}
-#line 1735 "y.tab.c"
+#line 1739 "y.tab.c"
     break;
 
   case 18:
-#line 242 "1705007.y"
+#line 246 "1705007.y"
                          {
 				fprintf(fp2,"At line no %d: compound_statement: LCURL RCURL\n\n",yylineno);
 				yyval->setName("{\n}");
@@ -1745,11 +1749,11 @@ yyreduce:
 				func_flag=0;
 				current_param="";
 			 }
-#line 1749 "y.tab.c"
+#line 1753 "y.tab.c"
     break;
 
   case 19:
-#line 253 "1705007.y"
+#line 257 "1705007.y"
         {
 		table->EnterScope();
 		if(func_flag==1){
@@ -1776,11 +1780,11 @@ yyreduce:
 			}
 		}
 	}
-#line 1780 "y.tab.c"
+#line 1784 "y.tab.c"
     break;
 
   case 20:
-#line 281 "1705007.y"
+#line 285 "1705007.y"
         {
 		vector <string> tokens;
 		stringstream check1(yyvsp[-1]->getName());
@@ -1812,38 +1816,38 @@ yyreduce:
 		yyval->setName(yyvsp[-2]->getName()+" "+yyvsp[-1]->getName()+";");
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 1816 "y.tab.c"
+#line 1820 "y.tab.c"
     break;
 
   case 21:
-#line 315 "1705007.y"
+#line 319 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: type_specifier : INT\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	}
-#line 1825 "y.tab.c"
+#line 1829 "y.tab.c"
     break;
 
   case 22:
-#line 320 "1705007.y"
+#line 324 "1705007.y"
                  {
 			fprintf(fp2,"At line no %d: type_specifier : FLOAT\n\n",yylineno);
 			fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		 }
-#line 1834 "y.tab.c"
+#line 1838 "y.tab.c"
     break;
 
   case 23:
-#line 325 "1705007.y"
+#line 329 "1705007.y"
                  {
 			fprintf(fp2,"At line no %d: type_specifier : VOID\n\n",yylineno);
 			fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		 }
-#line 1843 "y.tab.c"
+#line 1847 "y.tab.c"
     break;
 
   case 24:
-#line 332 "1705007.y"
+#line 336 "1705007.y"
         {
 		bool res = table->Insert(yyvsp[0]->getName(),yyvsp[0]->getType());
 		if(!res){
@@ -1855,11 +1859,11 @@ yyreduce:
 		yyval->setName(yyvsp[-2]->getName()+","+yyvsp[0]->getName());
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 1859 "y.tab.c"
+#line 1863 "y.tab.c"
     break;
 
   case 25:
-#line 344 "1705007.y"
+#line 348 "1705007.y"
                    {
 			   bool res = table->Insert(yyvsp[-3]->getName(),yyvsp[-3]->getType());
 				if(!res){
@@ -1874,11 +1878,11 @@ yyreduce:
 				yyval->setName(yyvsp[-5]->getName()+","+yyvsp[-3]->getName()+"["+yyvsp[-1]->getName()+"]");
 				fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 		   }
-#line 1878 "y.tab.c"
+#line 1882 "y.tab.c"
     break;
 
   case 26:
-#line 359 "1705007.y"
+#line 363 "1705007.y"
                    {
 			   	bool res = table->Insert(yyvsp[0]->getName(),yyvsp[0]->getType());
 				if(!res){
@@ -1889,11 +1893,11 @@ yyreduce:
 			   	fprintf(fp2,"At line no %d: declaration_list: ID\n\n",yylineno);
 				fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		   }
-#line 1893 "y.tab.c"
+#line 1897 "y.tab.c"
     break;
 
   case 27:
-#line 370 "1705007.y"
+#line 374 "1705007.y"
                    {
 			   table->PrintAll(fp2);
 			   bool res = table->Insert(yyvsp[-3]->getName(),yyvsp[-3]->getType());
@@ -1909,136 +1913,137 @@ yyreduce:
 				yyval->setName(yyvsp[-3]->getName()+"["+yyvsp[-1]->getName()+"]");
 				fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 		   }
-#line 1913 "y.tab.c"
+#line 1917 "y.tab.c"
     break;
 
   case 28:
-#line 388 "1705007.y"
+#line 392 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: statements: statement\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	}
-#line 1922 "y.tab.c"
+#line 1926 "y.tab.c"
     break;
 
   case 29:
-#line 393 "1705007.y"
+#line 397 "1705007.y"
            {
 		   	fprintf(fp2,"At line no %d: statements: statements statement\n\n",yylineno);
 			yyval->setName(yyvsp[-1]->getName()+"\n"+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	   }
-#line 1932 "y.tab.c"
+#line 1936 "y.tab.c"
     break;
 
   case 30:
-#line 401 "1705007.y"
+#line 405 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: statement: var_declaration\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	}
-#line 1941 "y.tab.c"
+#line 1945 "y.tab.c"
     break;
 
   case 31:
-#line 406 "1705007.y"
+#line 410 "1705007.y"
           {
 		  	fprintf(fp2,"At line no %d: statement: expression_statement\n\n",yylineno);
 			fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	  }
-#line 1950 "y.tab.c"
+#line 1954 "y.tab.c"
     break;
 
   case 32:
-#line 411 "1705007.y"
+#line 415 "1705007.y"
           {
 		  	fprintf(fp2,"At line no %d: statement: compound_statement\n\n",yylineno);
 			fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	  }
-#line 1959 "y.tab.c"
+#line 1963 "y.tab.c"
     break;
 
   case 33:
-#line 416 "1705007.y"
+#line 420 "1705007.y"
           {
 		  	fprintf(fp2,"At line no %d: statement: FOR LPAREN expression_statement expression_statement expression RPAREN statement\n\n",yylineno);
 			yyval->setName(yyvsp[-6]->getName()+"("+yyvsp[-4]->getName()+yyvsp[-3]->getName()+yyvsp[-2]->getName()+")"+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	  }
-#line 1969 "y.tab.c"
+#line 1973 "y.tab.c"
     break;
 
   case 34:
-#line 422 "1705007.y"
+#line 426 "1705007.y"
           {
 		  	fprintf(fp2,"At line no %d: statement: IF LPAREN expression RPAREN statement\n\n",yylineno);
 			yyval->setName(yyvsp[-4]->getName()+"("+yyvsp[-2]->getName()+")"+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	  }
-#line 1979 "y.tab.c"
+#line 1983 "y.tab.c"
     break;
 
   case 35:
-#line 428 "1705007.y"
+#line 432 "1705007.y"
           {
 		  	fprintf(fp2,"At line no %d: statement: IF LPAREN expression RPAREN statement ELSE statement\n\n",yylineno);
 			yyval->setName(yyvsp[-6]->getName()+"("+yyvsp[-4]->getName()+")"+yyvsp[-2]->getName()+yyvsp[-1]->getName()+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	  }
-#line 1989 "y.tab.c"
+#line 1993 "y.tab.c"
     break;
 
   case 36:
-#line 434 "1705007.y"
+#line 438 "1705007.y"
           {
 		  	fprintf(fp2,"At line no %d: statement: WHILE LPAREN expression RPAREN statement\n\n",yylineno);
 			yyval->setName(yyvsp[-4]->getName()+"("+yyvsp[-2]->getName()+")"+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	  }
-#line 1999 "y.tab.c"
+#line 2003 "y.tab.c"
     break;
 
   case 37:
-#line 440 "1705007.y"
+#line 444 "1705007.y"
           {
 		  	fprintf(fp2,"At line no %d: statement: PRINTLN LPAREN ID RPAREN SEMICOLON\n\n",yylineno);
 			yyval->setName(yyvsp[-4]->getName()+"("+yyvsp[-2]->getName()+")"+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	  }
-#line 2009 "y.tab.c"
+#line 2013 "y.tab.c"
     break;
 
   case 38:
-#line 446 "1705007.y"
+#line 450 "1705007.y"
           {
 		  	fprintf(fp2,"At line no %d: statement: RETURN expression SEMICOLON\n\n",yylineno);
 			yyval->setName(yyvsp[-2]->getName()+" "+yyvsp[-1]->getName()+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	  }
-#line 2019 "y.tab.c"
+#line 2023 "y.tab.c"
     break;
 
   case 39:
-#line 454 "1705007.y"
+#line 458 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: expression_statement: SEMICOLON\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	}
-#line 2028 "y.tab.c"
+#line 2032 "y.tab.c"
     break;
 
   case 40:
-#line 459 "1705007.y"
+#line 463 "1705007.y"
                         {
+				yyval->datatype = yyvsp[-1]->datatype;
 				fprintf(fp2,"At line no %d: expression_statement: expression SEMICOLON\n\n",yylineno);
 				yyval->setName(yyvsp[-1]->getName()+";");
 				fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 			}
-#line 2038 "y.tab.c"
+#line 2043 "y.tab.c"
     break;
 
   case 41:
-#line 467 "1705007.y"
+#line 472 "1705007.y"
 {
 	if(table->Lookup(yyvsp[0]->getName())==nullptr){
 		error_count++;
@@ -2054,11 +2059,11 @@ yyreduce:
 	fprintf(fp2,"At line no %d: variable: ID\n\n",yylineno);
 	fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 }
-#line 2058 "y.tab.c"
+#line 2063 "y.tab.c"
     break;
 
   case 42:
-#line 483 "1705007.y"
+#line 488 "1705007.y"
         {
 		if(table->Lookup(yyvsp[-3]->getName())==nullptr){
 			error_count++;
@@ -2079,21 +2084,21 @@ yyreduce:
 		yyval->setName(yyvsp[-3]->getName()+"["+yyvsp[-1]->getName()+"]");
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 2083 "y.tab.c"
+#line 2088 "y.tab.c"
     break;
 
   case 43:
-#line 506 "1705007.y"
+#line 511 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: expression: logic_expression\n\n",yylineno);
 		yyval->datatype=yyvsp[0]->datatype;
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	}
-#line 2093 "y.tab.c"
+#line 2098 "y.tab.c"
     break;
 
   case 44:
-#line 512 "1705007.y"
+#line 517 "1705007.y"
            {
 		   if(yyvsp[-2]->datatype=="float"&&(yyvsp[0]->datatype=="int" || yyvsp[0]->datatype=="float")){
 			   yyval->datatype="float";
@@ -2113,21 +2118,21 @@ yyreduce:
 			yyval->setName(yyvsp[-2]->getName()+yyvsp[-1]->getName()+yyvsp[0]->getName());
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	   }
-#line 2117 "y.tab.c"
+#line 2122 "y.tab.c"
     break;
 
   case 45:
-#line 534 "1705007.y"
+#line 539 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: logic_expression: rel_expression\n\n",yylineno);
 		yyval->datatype=yyvsp[0]->datatype;
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	}
-#line 2127 "y.tab.c"
+#line 2132 "y.tab.c"
     break;
 
   case 46:
-#line 540 "1705007.y"
+#line 545 "1705007.y"
                  {
 			 if(yyvsp[-2]->datatype=="void" || yyvsp[0]->datatype=="void"){
 				error_count++;
@@ -2138,21 +2143,21 @@ yyreduce:
 			yyval->datatype="int";
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 		 }
-#line 2142 "y.tab.c"
+#line 2147 "y.tab.c"
     break;
 
   case 47:
-#line 553 "1705007.y"
+#line 558 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: rel_expression: simple_expression\n\n",yylineno);
 		yyval->datatype=yyvsp[0]->datatype;
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 	}
-#line 2152 "y.tab.c"
+#line 2157 "y.tab.c"
     break;
 
   case 48:
-#line 559 "1705007.y"
+#line 564 "1705007.y"
                 {
 			if(yyvsp[-2]->datatype=="void" || yyvsp[0]->datatype=="void"){
 				error_count++;
@@ -2163,47 +2168,47 @@ yyreduce:
 			yyval->datatype="int";
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 		}
-#line 2167 "y.tab.c"
+#line 2172 "y.tab.c"
     break;
 
   case 49:
-#line 572 "1705007.y"
+#line 577 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: simple_expression: term\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		yyval->datatype=yyvsp[0]->datatype;
 	}
-#line 2177 "y.tab.c"
+#line 2182 "y.tab.c"
     break;
 
   case 50:
-#line 578 "1705007.y"
+#line 583 "1705007.y"
                   {
 			  	fprintf(fp2,"At line no %d: simple_expression: simple_expression ADDOP term\n\n",yylineno);
-				yyval->setName(yyvsp[-2]->getName()+yyvsp[-1]->getName()+yyvsp[0]->getName());
 				if(yyvsp[-2]->datatype=="float"||yyvsp[0]->datatype=="float"){
 					yyval->datatype="float";
 				}
 				else{
 					yyval->datatype="int";
 				}
+				yyval->setName(yyvsp[-2]->getName()+yyvsp[-1]->getName()+yyvsp[0]->getName());
 				fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 		  }
-#line 2193 "y.tab.c"
+#line 2198 "y.tab.c"
     break;
 
   case 51:
-#line 592 "1705007.y"
+#line 597 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: term: unary_expression\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		yyval->datatype=yyvsp[0]->datatype;
 	}
-#line 2203 "y.tab.c"
+#line 2208 "y.tab.c"
     break;
 
   case 52:
-#line 598 "1705007.y"
+#line 603 "1705007.y"
          {
 		 	if(yyvsp[0]->datatype=="void"){
 				error_count++;
@@ -2231,12 +2236,13 @@ yyreduce:
 				}
 			}
 	 }
-#line 2235 "y.tab.c"
+#line 2240 "y.tab.c"
     break;
 
   case 53:
-#line 628 "1705007.y"
+#line 633 "1705007.y"
         {
+		yyval->datatype=yyvsp[0]->datatype;
 		if(yyvsp[0]->datatype=="void"){
 			error_count++;
 			fprintf(fp3,"Error at Line %d : Void function used in expression\n\n",yylineno);
@@ -2244,13 +2250,12 @@ yyreduce:
 		fprintf(fp2,"At line no %d: unary_expression: ADDOP unary_expression\n\n",yylineno);
 		yyval->setName(yyvsp[-1]->getName()+yyvsp[0]->getName());
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
-		yyval->datatype=yyvsp[0]->datatype;
 	}
-#line 2250 "y.tab.c"
+#line 2255 "y.tab.c"
     break;
 
   case 54:
-#line 639 "1705007.y"
+#line 644 "1705007.y"
                  {
 			if(yyvsp[0]->datatype=="void"){
 				error_count++;
@@ -2261,31 +2266,31 @@ yyreduce:
 			fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 			yyval->datatype=yyvsp[0]->datatype;
 		 }
-#line 2265 "y.tab.c"
+#line 2270 "y.tab.c"
     break;
 
   case 55:
-#line 650 "1705007.y"
+#line 655 "1705007.y"
                  {
 			fprintf(fp2,"At line no %d: unary_expression: factor\n\n",yylineno);
 			fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 			yyval->datatype=yyvsp[0]->datatype;
 		 }
-#line 2275 "y.tab.c"
+#line 2280 "y.tab.c"
     break;
 
   case 56:
-#line 658 "1705007.y"
+#line 663 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: factor: variable\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		yyval->datatype=yyvsp[0]->datatype;
 	}
-#line 2285 "y.tab.c"
+#line 2290 "y.tab.c"
     break;
 
   case 57:
-#line 664 "1705007.y"
+#line 669 "1705007.y"
         {
 		if(table->Lookup(yyvsp[-3]->getName())==nullptr){
 			error_count++;
@@ -2317,74 +2322,74 @@ yyreduce:
 		yyval->setName(yyvsp[-3]->getName()+yyvsp[-2]->getName()+yyvsp[-1]->getName()+yyvsp[0]->getName());
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 2321 "y.tab.c"
+#line 2326 "y.tab.c"
     break;
 
   case 58:
-#line 696 "1705007.y"
+#line 701 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: factor: LPAREN expression RPAREN\n\n",yylineno);
 		yyval->datatype=yyvsp[-1]->datatype;
 		yyval->setName(yyvsp[-2]->getName()+yyvsp[-1]->getName()+yyvsp[0]->getName());
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 2332 "y.tab.c"
+#line 2337 "y.tab.c"
     break;
 
   case 59:
-#line 703 "1705007.y"
+#line 708 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: factor: CONST_INT\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		yyval->datatype="int";
 	}
-#line 2342 "y.tab.c"
+#line 2347 "y.tab.c"
     break;
 
   case 60:
-#line 709 "1705007.y"
+#line 714 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: factor: CONST_FLOAT\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		yyval->datatype="float";
 	}
-#line 2352 "y.tab.c"
+#line 2357 "y.tab.c"
     break;
 
   case 61:
-#line 715 "1705007.y"
+#line 720 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: factor: variable INCOP\n\n",yylineno);
 		yyval->datatype=yyvsp[-1]->datatype;
 		yyval->setName(yyvsp[-1]->getName()+yyvsp[0]->getName());
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 2363 "y.tab.c"
+#line 2368 "y.tab.c"
     break;
 
   case 62:
-#line 722 "1705007.y"
+#line 727 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: factor: variable DECOP\n\n",yylineno);
 		yyval->datatype=yyvsp[-1]->datatype;
 		yyval->setName(yyvsp[-1]->getName()+yyvsp[0]->getName());
 		fprintf(fp2,"%s\n\n",yyval->getName().c_str());
 	}
-#line 2374 "y.tab.c"
+#line 2379 "y.tab.c"
     break;
 
   case 63:
-#line 731 "1705007.y"
+#line 736 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: argument_list: arguments\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 		yyval->param_list=yyvsp[0]->param_list;
 	}
-#line 2384 "y.tab.c"
+#line 2389 "y.tab.c"
     break;
 
   case 65:
-#line 740 "1705007.y"
+#line 745 "1705007.y"
         {
 		fprintf(fp2,"At line no %d: arguments: arguments COMMA logic_expression\n\n",yylineno);
 		yyval->setName(yyvsp[-2]->getName()+yyvsp[-1]->getName()+yyvsp[0]->getName());
@@ -2392,21 +2397,21 @@ yyreduce:
 		yyval->param_list=yyvsp[-2]->param_list;
 		yyval->param_list.push_back(yyvsp[0]->datatype);
 	}
-#line 2396 "y.tab.c"
+#line 2401 "y.tab.c"
     break;
 
   case 66:
-#line 748 "1705007.y"
+#line 753 "1705007.y"
                   {
 			  	fprintf(fp2,"At line no %d: arguments: logic_expression\n\n",yylineno);
 				fprintf(fp2,"%s\n\n",yyvsp[0]->getName().c_str());
 				yyval->param_list.push_back(yyvsp[0]->datatype);
 		  }
-#line 2406 "y.tab.c"
+#line 2411 "y.tab.c"
     break;
 
 
-#line 2410 "y.tab.c"
+#line 2415 "y.tab.c"
 
       default: break;
     }
@@ -2638,7 +2643,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 756 "1705007.y"
+#line 761 "1705007.y"
 
 int main(int argc,char *argv[])
 {

@@ -295,6 +295,12 @@ STRING ["]
 	return CONTINUE;
 }
 
+"printf" {
+	SymbolInfo *s = new SymbolInfo(yytext,"");
+	yylval=(YYSTYPE)s;
+	return PRINTLN;
+}
+
 {ADDOP}	{
 	SymbolInfo *s= new  SymbolInfo(yytext,"");
 	yylval = (YYSTYPE)s;
