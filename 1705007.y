@@ -15,6 +15,7 @@ extern int error_count;
 SymbolTable *table;
 FILE* fp2;
 FILE* fp3;
+FILE* fp4;
 int func_flag=0;
 int has_param=0;
 string current_param;
@@ -775,7 +776,7 @@ int main(int argc,char *argv[])
 	
 	fp2= fopen(argv[2],"a");
 	fp3= fopen(argv[3],"a");
-	
+	fp4= fopen(argv[4],"a");
 
 	yyin=fp;
 	yyparse();
