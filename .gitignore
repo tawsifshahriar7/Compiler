@@ -1,0 +1,6 @@
+#Files that need to be untracked
+*.o
+*.out
+*.txt
+*.asm
+*.output
