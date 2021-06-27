@@ -7,10 +7,13 @@ private:
     string Name,Type;
 public:
     string datatype;
+	string code;
     SymbolInfo* next;
     bool isFunc;
     bool isArray;
     bool multiDec;
+	string symbol;
+    int offset;
     vector<string> param_list;
     SymbolInfo(string Name,string Type){
         next=nullptr;
@@ -32,6 +35,12 @@ public:
     void setType(string Type){
         this->Type=Type;
     }
+	string getSymbol(){
+		return symbol;
+	}
+	void setSymbol(string s){
+		symbol=s;
+	}
     ~SymbolInfo()= default;
 };
 

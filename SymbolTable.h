@@ -34,7 +34,7 @@ public:
         ScopeTable* nS;
         nS=new ScopeTable(no_of_buckets);
         nS->setParent(current);
-        string newID=current->getID()+"."+to_string(current->deleted_child+1);
+        string newID=current->getID()+to_string(current->deleted_child+1);
         nS->setID(newID);
         current=nS;
     }
@@ -98,6 +98,9 @@ public:
             x=x->getParent();
         }
         x->Print(logout);
+    }
+    string getCurrentID(){
+        return current->getID();
     }
 };
 

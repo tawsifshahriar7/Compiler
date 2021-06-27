@@ -19,10 +19,25 @@ FILE* fp4;
 int func_flag=0;
 int has_param=0;
 string current_param;
-
+int labelCount=0;
+int tempCount=0;
+vector<string> var_list;
+int current_offset=0;
 void yyerror(char *s)
 {
 	
+}
+
+string newLabel(){
+	string label = "L"+to_string(labelCount);
+	labelCount++;
+	return label;
+}
+
+string newTemp(){
+	string temp = "t"+to_string(tempCount);
+	tempCount++;
+	return temp;
 }
 
 vector<string> param_parse(string str){
@@ -55,6 +70,16 @@ start: program
 		table->PrintAll(fp2);
 		fprintf(fp2,"Total Lines: %d\n\nTotal Errors: %d",yylineno,error_count);
 		fprintf(fp3,"Total Errors: %d",error_count);
+		string code;
+		code = ".model small\n.stack 100h\n.data\n";
+		for(int i=0;i<tempCount;i++){
+			code+="t"+to_string(i)+" dw ?\n";
+		}
+		code+=".code\n";
+		code+=$1->code+".exit\n";
+		if(error_count==0){
+			fprintf(fp4,"%s",code.c_str());
+		}
 	}
 	;
 
@@ -69,6 +94,7 @@ program: program unit
 		fprintf(fp2,"At line no %d: program: unit\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
 		$$=$1;
+		$$->code = $1->code;
 	}
 	;
 	
@@ -77,6 +103,7 @@ unit: var_declaration
 		fprintf(fp2,"At line no %d: unit: var_declaration\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
 		$$=$1;
+		$$->code=$1->code;
 	}
      | func_declaration
 	 {
@@ -89,6 +116,7 @@ unit: var_declaration
 		fprintf(fp2,"At line no %d: unit: func_definition\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
 		$$=$1;
+		$$->code = $1->code;
 	 }
      ;
 
@@ -130,6 +158,9 @@ func_start: type_specifier ID LPAREN parameter_list RPAREN
 		current_param = $4->getName();
 		$$->setName($1->getName()+" "+$2->getName()+" ("+$4->getName()+")");
 		func_flag=1;
+		if($2->getName()=="main"){
+			$$->code = "mov ax,@data\nmov ds,ax\n";
+		}
 	}
 	| type_specifier ID LPAREN RPAREN
 	{
@@ -155,6 +186,9 @@ func_start: type_specifier ID LPAREN parameter_list RPAREN
 		}
 		$$->setName($1->getName()+" "+$2->getName()+" ()");
 		func_flag=1;
+		if($2->getName()=="main"){
+			$$->code = "mov ax,@data\nmov ds,ax\n";
+		}
 	}
 	;
 
@@ -201,8 +235,9 @@ func_definition: func_start compound_statement
 		else{
 			fprintf(fp2,"At line no %d: func_definition: type_specifier ID LPAREN RPAREN compound_statement\n\n",yylineno);
 		}
-		 $$->setName($1->getName()+" "+$2->getName());
-		 fprintf(fp2,"%s\n\n",$$->getName().c_str());
+		$$->setName($1->getName()+" "+$2->getName());
+		fprintf(fp2,"%s\n\n",$$->getName().c_str());
+		$$->code =$1->code + $2->code;
 	}
  		;				
 
@@ -242,6 +277,7 @@ compound_statement: compound_statement_start statements RCURL
 		table->ExitScope();
 		func_flag=0;
 		current_param="";
+		$$->code = $2->code;
 	}
  		    | compound_statement_start RCURL
 			 {
@@ -313,6 +349,7 @@ var_declaration: type_specifier declaration_list SEMICOLON
 		fprintf(fp2,"At line no %d: var_declaration: type_specifier declaration_list SEMICOLON\n\n",yylineno);
 		$$->setName($1->getName()+" "+$2->getName()+";");
 		fprintf(fp2,"%s\n\n",$$->getName().c_str());
+		$$->code=$2->code;
 	}
  		 ;
  		 
@@ -341,6 +378,12 @@ declaration_list: declaration_list COMMA ID
 			error_count++;
 			fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,$3->getName().c_str());
 		}
+		else{
+			//var_list.push_back($3->getName()+table->getCurrentID());
+			$$->code="mov ax,0\npush ax\n";
+			current_offset+=2;
+			table->Lookup($3->getName())->offset=current_offset;
+		}
 		fprintf(fp2,"At line no %d: declaration_list: declaration_list COMMA ID\n\n",yylineno);
 		$$->setName($1->getName()+","+$3->getName());
 		fprintf(fp2,"%s\n\n",$$->getName().c_str());
@@ -368,6 +411,12 @@ declaration_list: declaration_list COMMA ID
 					error_count++;
 					fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,$1->getName().c_str());
 				}
+				else{
+					//var_list.push_back($1->getName()+table->getCurrentID());
+					$$->code="mov ax,0\npush ax\n";
+					current_offset+=2;
+					table->Lookup($1->getName())->offset=current_offset;
+				}
 			   	fprintf(fp2,"At line no %d: declaration_list: ID\n\n",yylineno);
 				fprintf(fp2,"%s\n\n",$1->getName().c_str());
 		   }
@@ -393,12 +442,14 @@ statements: statement
 	{
 		fprintf(fp2,"At line no %d: statements: statement\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
+		$$->code = $1->code;
 	}
 	   | statements statement
 	   {
 		   	fprintf(fp2,"At line no %d: statements: statements statement\n\n",yylineno);
 			$$->setName($1->getName()+"\n"+$2->getName());
 			fprintf(fp2,"%s\n\n",$$->getName().c_str());
+			$$->code = $1->code+$2->code;
 	   }
 	   ;
 	   
@@ -406,11 +457,13 @@ statement: var_declaration
 	{
 		fprintf(fp2,"At line no %d: statement: var_declaration\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
+		$$->code=$1->code;
 	}
 	  | expression_statement
 	  {
 		  	fprintf(fp2,"At line no %d: statement: expression_statement\n\n",yylineno);
 			fprintf(fp2,"%s\n\n",$1->getName().c_str());
+			$$->code = $1->code;
 	  }
 	  | compound_statement
 	  {
@@ -446,6 +499,9 @@ statement: var_declaration
 		  	fprintf(fp2,"At line no %d: statement: PRINTLN LPAREN ID RPAREN SEMICOLON\n\n",yylineno);
 			$$->setName($1->getName()+"("+$3->getName()+")"+$5->getName());
 			fprintf(fp2,"%s\n\n",$$->getName().c_str());
+			$$->code+="push bp\nmov bp,sp\n";
+			$$->code+="mov ax,[bp+"+to_string(table->Lookup($3->getName())->offset)+"]\n";
+			$$->code+="mov dl,al\nadd dl,30h\nmov ah,2\nint 21h\npop bp\n";
 	  }
 	  | RETURN expression SEMICOLON
 	  {
@@ -466,6 +522,7 @@ expression_statement: SEMICOLON
 				fprintf(fp2,"At line no %d: expression_statement: expression SEMICOLON\n\n",yylineno);
 				$$->setName($1->getName()+";");
 				fprintf(fp2,"%s\n\n",$$->getName().c_str());
+				$$->code = $1->code;
 			} 
 			;
 	  
@@ -484,6 +541,7 @@ variable: ID
 	}
 	fprintf(fp2,"At line no %d: variable: ID\n\n",yylineno);
 	fprintf(fp2,"%s\n\n",$1->getName().c_str());
+	$$->offset = table->Lookup($1->getName())->offset;
 }	
 	| ID LTHIRD expression RTHIRD 
 	{
@@ -513,6 +571,7 @@ expression: logic_expression
 		fprintf(fp2,"At line no %d: expression: logic_expression\n\n",yylineno);
 		$$->datatype=$1->datatype;
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
+		$$->code = $1->code;
 	}
 	   | variable ASSIGNOP logic_expression 
 	   {
@@ -533,6 +592,12 @@ expression: logic_expression
 		   	fprintf(fp2,"At line no %d: expression: variable ASSIGNOP logic_expression\n\n",yylineno);
 			$$->setName($1->getName()+$2->getName()+$3->getName());
 			fprintf(fp2,"%s\n\n",$$->getName().c_str());
+			$$->code+=$3->code;
+			$$->code+=";var=expr\npush bp\nmov bp,sp\n";
+			$$->code+="mov ax,"+$3->getSymbol()+"\n";
+			$$->code+="mov [bp+"+to_string($1->offset)+"],ax\n";
+			$$->code+="pop bp\n";
+			$$->setSymbol($3->getSymbol());
 	   }	
 	   ;
 			
@@ -541,6 +606,7 @@ logic_expression: rel_expression
 		fprintf(fp2,"At line no %d: logic_expression: rel_expression\n\n",yylineno);
 		$$->datatype=$1->datatype;
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
+		$$->code = $1->code;
 	}
 		 | rel_expression LOGICOP rel_expression 
 		 {
@@ -560,6 +626,7 @@ rel_expression: simple_expression
 		fprintf(fp2,"At line no %d: rel_expression: simple_expression\n\n",yylineno);
 		$$->datatype=$1->datatype;
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
+		$$->code = $1->code;
 	}
 		| simple_expression RELOP simple_expression	
 		{
@@ -579,6 +646,7 @@ simple_expression: term
 		fprintf(fp2,"At line no %d: simple_expression: term\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
 		$$->datatype=$1->datatype;
+		$$->code = $1->code;
 	}
 		  | simple_expression ADDOP term 
 		  {
@@ -599,6 +667,7 @@ term:	unary_expression
 		fprintf(fp2,"At line no %d: term: unary_expression\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
 		$$->datatype=$1->datatype;
+		$$->code = $1->code;
 	}
      |  term MULOP unary_expression
 	 {
@@ -657,6 +726,7 @@ unary_expression: ADDOP unary_expression
 			fprintf(fp2,"At line no %d: unary_expression: factor\n\n",yylineno);
 			fprintf(fp2,"%s\n\n",$1->getName().c_str());
 			$$->datatype=$1->datatype;
+			$$->code = $1->code;
 		 }
 		 ;
 	
@@ -665,6 +735,11 @@ factor: variable
 		fprintf(fp2,"At line no %d: factor: variable\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
 		$$->datatype=$1->datatype;
+		string temp = newTemp();
+		$$->code+="push bp\nmov bp,sp\n";
+		$$->code+="mov ax,[bp+"+to_string($1->offset)+"]\n";
+		$$->code+="mov "+temp+",ax\npop bp\n";
+		$$->setSymbol(temp);
 	}
 	| ID LPAREN argument_list RPAREN
 	{
@@ -704,12 +779,18 @@ factor: variable
 		$$->datatype=$2->datatype;
 		$$->setName($1->getName()+$2->getName()+$3->getName());
 		fprintf(fp2,"%s\n\n",$$->getName().c_str());
+		$$->code=$2->code;
+		$$->setSymbol($2->getSymbol());
 	}
 	| CONST_INT
 	{
 		fprintf(fp2,"At line no %d: factor: CONST_INT\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
 		$$->datatype="int";
+		string temp = newTemp();
+		$$->code+=";const_int\npush bp\nmov bp,sp\n";
+		$$->code+="mov "+temp+","+$1->getName()+"\npop bp\n";
+		$$->setSymbol(temp);
 	} 
 	| CONST_FLOAT
 	{
@@ -723,6 +804,17 @@ factor: variable
 		$$->datatype=$1->datatype;
 		$$->setName($1->getName()+$2->getName());
 		fprintf(fp2,"%s\n\n",$$->getName().c_str());
+		$$->code+="push bp\nmov bp,sp\n";
+		$$->code+="mov ax,[bp+"+to_string($1->offset)+"]\n";
+		if($2->getName()=="++"){
+			$$->code+="add ax,1\n";
+		}
+		else{
+			$$->code+="sub ax,1\n";
+		}
+		string temp = newTemp();
+		$$->code+="mov "+temp+",ax\npop bp\n";
+		$$->setSymbol(temp);
 	} 
 	| variable DECOP
 	{
@@ -773,6 +865,8 @@ int main(int argc,char *argv[])
 	fclose(fp2);
 	fp3= fopen(argv[3],"w");
 	fclose(fp3);
+	fp4= fopen(argv[4],"w");
+	fclose(fp4);
 	
 	fp2= fopen(argv[2],"a");
 	fp3= fopen(argv[3],"a");
