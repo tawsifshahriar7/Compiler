@@ -499,7 +499,7 @@ statement: var_declaration
 		  	fprintf(fp2,"At line no %d: statement: PRINTLN LPAREN ID RPAREN SEMICOLON\n\n",yylineno);
 			$$->setName($1->getName()+"("+$3->getName()+")"+$5->getName());
 			fprintf(fp2,"%s\n\n",$$->getName().c_str());
-			$$->code+="push bp\nmov bp,sp\n";
+			$$->code+="\n;print\npush bp\nmov bp,sp\n";
 			$$->code+="mov ax,[bp+"+to_string(table->Lookup($3->getName())->offset)+"]\n";
 			$$->code+="mov dl,al\nadd dl,30h\nmov ah,2\nint 21h\npop bp\n";
 	  }
@@ -593,7 +593,7 @@ expression: logic_expression
 			$$->setName($1->getName()+$2->getName()+$3->getName());
 			fprintf(fp2,"%s\n\n",$$->getName().c_str());
 			$$->code+=$3->code;
-			$$->code+=";var=expr\npush bp\nmov bp,sp\n";
+			$$->code+="\n;var=expr\npush bp\nmov bp,sp\n";
 			$$->code+="mov ax,"+$3->getSymbol()+"\n";
 			$$->code+="mov [bp+"+to_string($1->offset)+"],ax\n";
 			$$->code+="pop bp\n";
@@ -671,6 +671,30 @@ term:	unary_expression
 	}
      |  term MULOP unary_expression
 	 {
+
+		 	$$->code+=$1->code+$3->code+"\n;term MULOP expr\n";
+			if($2->getName()=="*"){
+				$$->code+="mov ax,"+$1->getSymbol()+"\n";
+				$$->code+="mov bx,"+$3->getSymbol()+"\n";
+				$$->code+="imul bx\n";
+				$$->code+="mov "+$1->getSymbol()+",ax\n";
+			}
+			else if($2->getName()=="/"){
+				$$->code+="mov dx,0\n";
+				$$->code+="mov ax,"+$1->getSymbol()+"\n";
+				$$->code+="mov bx,"+$3->getSymbol()+"\n";
+				$$->code+="idiv bx\n";
+				$$->code+="mov "+$1->getSymbol()+",ax\n";
+			}
+			else if($2->getName()=="%"){
+				$$->code+="mov dx,0\n";
+				$$->code+="mov ax,"+$1->getSymbol()+"\n";
+				$$->code+="mov bx,"+$3->getSymbol()+"\n";
+				$$->code+="idiv bx\n";
+				$$->code+="mov "+$1->getSymbol()+",dx\n";
+			}
+			$$->setSymbol($1->getSymbol());
+
 		 	if($3->datatype=="void"){
 				error_count++;
 				fprintf(fp3,"Error at Line %d : Void function used in expression\n\n",yylineno);
@@ -707,6 +731,15 @@ unary_expression: ADDOP unary_expression
 			fprintf(fp3,"Error at Line %d : Void function used in expression\n\n",yylineno);
 		}
 		fprintf(fp2,"At line no %d: unary_expression: ADDOP unary_expression\n\n",yylineno);
+
+		$$->code+=$2->code+"\n;ADDOP expr\n";
+		if($1->getName()=="-"){
+			$$->code+="mov ax,0\n";
+			$$->code+="sub ax,"+$2->getSymbol()+"\n";
+			$$->code+="mov "+$2->getSymbol()+",ax\n";
+		}
+		$$->setSymbol($2->getSymbol());
+
 		$$->setName($1->getName()+$2->getName());
 		fprintf(fp2,"%s\n\n",$$->getName().c_str());
 	}
@@ -720,6 +753,15 @@ unary_expression: ADDOP unary_expression
 			$$->setName($1->getName()+$2->getName());
 			fprintf(fp2,"%s\n\n",$$->getName().c_str());
 			$$->datatype=$2->datatype;
+			string label1 = newLabel();
+			string label2 = newLabel();
+			$$->code+=$2->code;
+			$$->code+="\n;!expr\n";
+			$$->code+="cmp "+$2->getSymbol()+",0\n";
+			$$->code+="je "+label1+"\n";
+			$$->code+="mov "+$2->getSymbol()+",0\njmp "+label2+"\n";
+			$$->code+=label1+":\nmov "+$2->getSymbol()+",1\n"+label2+":\n";
+			$$->setSymbol($2->getSymbol());
 		 }
 		 | factor 
 		 {
@@ -736,7 +778,7 @@ factor: variable
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
 		$$->datatype=$1->datatype;
 		string temp = newTemp();
-		$$->code+="push bp\nmov bp,sp\n";
+		$$->code+="\n;var\npush bp\nmov bp,sp\n";
 		$$->code+="mov ax,[bp+"+to_string($1->offset)+"]\n";
 		$$->code+="mov "+temp+",ax\npop bp\n";
 		$$->setSymbol(temp);
@@ -788,7 +830,7 @@ factor: variable
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
 		$$->datatype="int";
 		string temp = newTemp();
-		$$->code+=";const_int\npush bp\nmov bp,sp\n";
+		$$->code+="\n;const_int\npush bp\nmov bp,sp\n";
 		$$->code+="mov "+temp+","+$1->getName()+"\npop bp\n";
 		$$->setSymbol(temp);
 	} 
@@ -804,7 +846,7 @@ factor: variable
 		$$->datatype=$1->datatype;
 		$$->setName($1->getName()+$2->getName());
 		fprintf(fp2,"%s\n\n",$$->getName().c_str());
-		$$->code+="push bp\nmov bp,sp\n";
+		$$->code+="\n;var incop\npush bp\nmov bp,sp\n";
 		$$->code+="mov ax,[bp+"+to_string($1->offset)+"]\n";
 		if($2->getName()=="++"){
 			$$->code+="add ax,1\n";
@@ -813,6 +855,7 @@ factor: variable
 			$$->code+="sub ax,1\n";
 		}
 		string temp = newTemp();
+		$$->code+="mov [bp+"+to_string($1->offset)+"],ax\n";
 		$$->code+="mov "+temp+",ax\npop bp\n";
 		$$->setSymbol(temp);
 	} 
