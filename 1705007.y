@@ -469,27 +469,75 @@ statement: var_declaration
 	  {
 		  	fprintf(fp2,"At line no %d: statement: compound_statement\n\n",yylineno);
 			fprintf(fp2,"%s\n\n",$1->getName().c_str());
+			$$->code = $1->code;
 	  }
 	  | FOR LPAREN expression_statement expression_statement expression RPAREN statement
 	  {
+		  	string start_label = newLabel();
+			string end_label = newLabel();
+		  	$$->code+="\n;for loop\n"+$3->code;
+			$$->code+=start_label+":\n"+$4->code;
+			$$->code+="mov ax,"+$4->getSymbol()+"\n";
+			$$->code+="cmp ax,0\n";
+			$$->code+="je "+end_label+"\n";
+			$$->code+=$7->code+$5->code;
+			$$->code+="jmp "+start_label+"\n";
+			$$->code+=end_label+":\n";
+
 		  	fprintf(fp2,"At line no %d: statement: FOR LPAREN expression_statement expression_statement expression RPAREN statement\n\n",yylineno);
 			$$->setName($1->getName()+"("+$3->getName()+$4->getName()+$5->getName()+")"+$7->getName());
 			fprintf(fp2,"%s\n\n",$$->getName().c_str());
 	  }
 	  | IF LPAREN expression RPAREN statement %prec LOW_ELSE
 	  {
+
+		  	string end_label = newLabel();
+			$$->code+="\n;if condition\n";
+			$$->code+=$3->code;
+			$$->code+="mov ax,"+$3->getSymbol()+"\n";
+			$$->code+="cmp ax,0\n";
+			$$->code+="je "+end_label+"\n";
+			$$->code+=$5->code;
+			$$->code+=end_label+":\n";
+
 		  	fprintf(fp2,"At line no %d: statement: IF LPAREN expression RPAREN statement\n\n",yylineno);
 			$$->setName($1->getName()+"("+$3->getName()+")"+$5->getName());
 			fprintf(fp2,"%s\n\n",$$->getName().c_str());
 	  }
 	  | IF LPAREN expression RPAREN statement ELSE statement
 	  {
+
+		  	string label1 = newLabel();
+			string label2 = newLabel();
+			$$->code+="\n;if-else ondition\n";
+			$$->code+=$3->code;
+			$$->code+="mov ax,"+$3->getSymbol()+"\n";
+			$$->code+="cmp ax,0\n";
+			$$->code+="je "+label1+"\n";
+			$$->code+=$5->code;
+			$$->code+="jmp "+label2+"\n";
+			$$->code+=label1+":\n";
+			$$->code+=$7->code;
+			$$->code+=label2+":\n";
+
 		  	fprintf(fp2,"At line no %d: statement: IF LPAREN expression RPAREN statement ELSE statement\n\n",yylineno);
 			$$->setName($1->getName()+"("+$3->getName()+")"+$5->getName()+$6->getName()+$7->getName());
 			fprintf(fp2,"%s\n\n",$$->getName().c_str());
 	  }
 	  | WHILE LPAREN expression RPAREN statement
 	  {
+
+		  	string start_label = newLabel();
+			string end_label = newLabel();
+			$$->code+="\n;while loop\n"+start_label+":\n";
+			$$->code+=$3->code;
+			$$->code+="mov ax,"+$3->getSymbol()+"\n";
+			$$->code+="cmp ax,0\n";
+			$$->code+="je "+end_label+"\n";
+			$$->code+=$5->code;
+			$$->code+="jmp "+start_label+"\n";
+			$$->code+=end_label+":\n";
+
 		  	fprintf(fp2,"At line no %d: statement: WHILE LPAREN expression RPAREN statement\n\n",yylineno);
 			$$->setName($1->getName()+"("+$3->getName()+")"+$5->getName());
 			fprintf(fp2,"%s\n\n",$$->getName().c_str());
@@ -572,6 +620,7 @@ expression: logic_expression
 		$$->datatype=$1->datatype;
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
 		$$->code = $1->code;
+		$$->setSymbol($1->getSymbol());
 	}
 	   | variable ASSIGNOP logic_expression 
 	   {
@@ -607,9 +656,32 @@ logic_expression: rel_expression
 		$$->datatype=$1->datatype;
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
 		$$->code = $1->code;
+		$$->setSymbol($1->getSymbol());
 	}
 		 | rel_expression LOGICOP rel_expression 
 		 {
+			 string label1 = newLabel();
+			 string label2 = newLabel();
+			 $$->code+=$1->code+$3->code;
+			 $$->code+="\n;expr LOGICOP expr\n";
+			 $$->code+="mov ax,"+$1->getSymbol()+"\n";
+			 $$->code+="mov bx,"+$3->getSymbol()+"\n";
+			 $$->code+="cmp ax,0\n";
+			 $$->code+="je "+label1+"\n";
+			 $$->code+="mov ax,1\n";
+			 $$->code+=label1+":\ncmp bx,0\n";
+			 $$->code+="je "+label2+"\n";
+			 $$->code+="mov bx,1\n";
+			 $$->code+=label2+":\n";
+			 if($2->getName()=="&&"){
+				$$->code+="and ax,bx\n";
+			 }
+			 else if($2->getName()=="||"){
+				$$->code+="or ax,bx\n";
+			 }
+			 $$->code+="mov "+$1->getSymbol()+",ax\n";
+			 $$->setSymbol($1->getSymbol());
+
 			 if($1->datatype=="void" || $3->datatype=="void"){
 				error_count++;
 				fprintf(fp3,"Error at Line %d : Void expression used with Logical operation\n\n",yylineno);
@@ -627,9 +699,52 @@ rel_expression: simple_expression
 		$$->datatype=$1->datatype;
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
 		$$->code = $1->code;
+		$$->setSymbol($1->getSymbol());
 	}
 		| simple_expression RELOP simple_expression	
 		{
+			string label1 = newLabel();
+			string label2 = newLabel();
+			$$->code+=$1->code+$3->code;
+			$$->code+="\n;expr RELOP expr\n";
+			$$->code+="mov ax,"+$1->getSymbol()+"\n";
+			$$->code+="mov bx,"+$3->getSymbol()+"\n";
+			$$->code+="cmp ax,bx\n";
+			if($2->getName()==">"){
+				$$->code+="jg "+label1+"\n";
+				$$->code+="mov ax,0\n";
+				$$->code+="jmp "+label2+"\n";
+			}
+			else if($2->getName()==">="){
+				$$->code+="jge "+label1+"\n";
+				$$->code+="mov ax,0\n";
+				$$->code+="jmp "+label2+"\n";
+			}
+			else if($2->getName()=="<"){
+				$$->code+="jl "+label1+"\n";
+				$$->code+="mov ax,0\n";
+				$$->code+="jmp "+label2+"\n";
+			}
+			else if($2->getName()=="<="){
+				$$->code+="jle "+label1+"\n";
+				$$->code+="mov ax,0\n";
+				$$->code+="jmp "+label2+"\n";
+			}
+			else if($2->getName()=="=="){
+				$$->code+="je "+label1+"\n";
+				$$->code+="mov ax,0\n";
+				$$->code+="jmp "+label2+"\n";
+			}
+			else if($2->getName()=="!="){
+				$$->code+="jne "+label1+"\n";
+				$$->code+="mov ax,0\n";
+				$$->code+="jmp "+label2+"\n";
+			}
+			$$->code+=label1+":\nmov ax,1\n";
+			$$->code+=label2+":\n";
+			$$->code+="mov "+$1->getSymbol()+",ax\n";
+			$$->setSymbol($1->getSymbol());
+
 			if($1->datatype=="void" || $3->datatype=="void"){
 				error_count++;
 				fprintf(fp3,"Error at Line %d : Void expression used with Relational operation\n\n",yylineno);
@@ -647,9 +762,22 @@ simple_expression: term
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
 		$$->datatype=$1->datatype;
 		$$->code = $1->code;
+		$$->setSymbol($1->getSymbol());
 	}
 		  | simple_expression ADDOP term 
 		  {
+			  	$$->code+=$1->code+$3->code;
+			  	$$->code+="\n;expr ADDOP expr\n";
+				$$->code+="mov ax,"+$1->getSymbol()+"\n";
+				if($2->getName()=="+"){
+					$$->code+="add ax,"+$3->getSymbol()+"\n";
+				}
+				else if($2->getName()=="-"){
+					$$->code+="sub ax,"+$3->getSymbol()+"\n";
+				}
+				$$->code+="mov "+$1->getSymbol()+",ax\n";
+				$$->setSymbol($1->getSymbol());
+
 			  	fprintf(fp2,"At line no %d: simple_expression: simple_expression ADDOP term\n\n",yylineno);
 				if($1->datatype=="float"||$3->datatype=="float"){
 					$$->datatype="float";
@@ -668,6 +796,7 @@ term:	unary_expression
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
 		$$->datatype=$1->datatype;
 		$$->code = $1->code;
+		$$->setSymbol($1->getSymbol());
 	}
      |  term MULOP unary_expression
 	 {
@@ -769,6 +898,7 @@ unary_expression: ADDOP unary_expression
 			fprintf(fp2,"%s\n\n",$1->getName().c_str());
 			$$->datatype=$1->datatype;
 			$$->code = $1->code;
+			$$->setSymbol($1->getSymbol());
 		 }
 		 ;
 	
