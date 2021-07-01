@@ -407,6 +407,12 @@ declaration_list: declaration_list COMMA ID
 				}
 				else{
 					table->Lookup($3->getName())->isArray=true;
+					string label = newLabel();
+					$$->code+="mov cx,"+$5->getName()+"\n";
+					$$->code+="mov ax,0\n"+label+":\n";
+					$$->code+="push ax\nloop "+label+"\n";
+					current_offset+=2*stoi($5->getName());
+					table->Lookup($3->getName())->offset=current_offset;
 				}
 			   	fprintf(fp2,"At line no %d: declaration_list: declaration_list COMMA ID LTHIRD CONST_INT RTHIRD\n\n",yylineno);
 				$$->setName($1->getName()+","+$3->getName()+"["+$5->getName()+"]");
@@ -440,6 +446,12 @@ declaration_list: declaration_list COMMA ID
 				}
 				else{
 					table->Lookup($1->getName())->isArray=true;
+					string label = newLabel();
+					$$->code+="mov cx,"+$3->getName()+"\n";
+					$$->code+="mov ax,0\n"+label+":\n";
+					$$->code+="push ax\nloop "+label+"\n";
+					current_offset+=2*stoi($3->getName());
+					table->Lookup($1->getName())->offset=current_offset;
 				}
 			   	fprintf(fp2,"At line no %d: declaration_list: ID LTHIRD CONST_INT RTHIRD\n\n",yylineno);
 				$$->setName($1->getName()+"["+$3->getName()+"]");
@@ -600,6 +612,13 @@ variable: ID
 	fprintf(fp2,"At line no %d: variable: ID\n\n",yylineno);
 	fprintf(fp2,"%s\n\n",$1->getName().c_str());
 	$$->offset = table->Lookup($1->getName())->offset;
+
+	string temp = newTemp();
+	$$->code+="\n;var\npush bp\nmov bp,sp\n";
+	$$->code+="mov ax,[bp+"+to_string(table->Lookup($1->getName())->offset)+"]\n";
+	$$->code+="mov "+temp+",ax\npop bp\n";
+	$$->setSymbol(temp);
+
 }	
 	| ID LTHIRD expression RTHIRD 
 	{
@@ -618,6 +637,17 @@ variable: ID
 			error_count++;
 			fprintf(fp3,"Error at Line %d : Non-integer Array Index\n\n",yylineno);
 		}
+		
+		int ofst = table->Lookup($1->getName())->offset;
+		$$->offset=ofst;
+		string temp = newTemp();
+		$$->code+="\n;var\npush bp\nmov bp,sp\n";
+		$$->code+="mov di,"+to_string(ofst)+"\n";
+		$$->code+="add di,"+$3->getSymbol()+"\n";
+		$$->code+="mov ax,[bp+di]\n";
+		$$->code+="mov "+temp+",ax\npop bp\n";
+		$$->setSymbol(temp);
+
 		fprintf(fp2,"At line no %d: variable: ID LTHIRD expression RTHIRD\n\n",yylineno);
 		$$->setName($1->getName()+"["+$3->getName()+"]");
 		fprintf(fp2,"%s\n\n",$$->getName().c_str());
@@ -917,11 +947,11 @@ factor: variable
 		fprintf(fp2,"At line no %d: factor: variable\n\n",yylineno);
 		fprintf(fp2,"%s\n\n",$1->getName().c_str());
 		$$->datatype=$1->datatype;
-		string temp = newTemp();
-		$$->code+="\n;var\npush bp\nmov bp,sp\n";
-		$$->code+="mov ax,[bp+"+to_string($1->offset)+"]\n";
-		$$->code+="mov "+temp+",ax\npop bp\n";
-		$$->setSymbol(temp);
+		//string temp = newTemp();
+		//$$->code+="\n;var\npush bp\nmov bp,sp\n";
+		//$$->code+="mov ax,[bp+"+to_string($1->offset)+"]\n";
+		//$$->code+="mov "+temp+",ax\npop bp\n";
+		$$->setSymbol($1->getSymbol());
 	}
 	| ID LPAREN argument_list RPAREN
 	{
