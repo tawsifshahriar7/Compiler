@@ -76,7 +76,16 @@ start: program
 			code+="t"+to_string(i)+" dw ?\n";
 		}
 		code+=".code\n";
-		code+=$1->code+".exit\n";
+		string print_func="printf proc\n";
+		print_func+="or ax,ax\njge end_if1\n";
+		print_func+="push ax\nmov dl,'-'\nmov ah,2\nint 21h\npop ax\nneg ax\n";
+		print_func+="end_if1:\nxor cx,cx\nmov bx,10d\n";
+		print_func+="repeat1:\nxor dx,dx\ndiv bx\npush dx\ninc cx\n";
+		print_func+="or ax,ax\njne repeat1\n";
+		print_func+="mov ah,2\n";
+		print_func+="print_loop:\npop dx\nor dl,30h\nint 21h\nloop print_loop\n";
+		print_func+="ret\nprintf endp\n";
+		code+=$1->code+"jmp exit\n"+print_func+"exit:\n.exit\n";
 		if(error_count==0){
 			fprintf(fp4,"%s",code.c_str());
 		}
@@ -549,7 +558,8 @@ statement: var_declaration
 			fprintf(fp2,"%s\n\n",$$->getName().c_str());
 			$$->code+="\n;print\npush bp\nmov bp,sp\n";
 			$$->code+="mov ax,[bp+"+to_string(table->Lookup($3->getName())->offset)+"]\n";
-			$$->code+="mov dl,al\nadd dl,30h\nmov ah,2\nint 21h\npop bp\n";
+			$$->code+="call printf\npop bp\n";
+			
 	  }
 	  | RETURN expression SEMICOLON
 	  {
