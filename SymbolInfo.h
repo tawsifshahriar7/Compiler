@@ -14,12 +14,17 @@ public:
     bool multiDec;
 	string symbol;
     int offset;
+    bool isGlobal;
+	int arraySize;
+	string var_id;
+	string index;
     vector<string> param_list;
     SymbolInfo(string Name,string Type){
         next=nullptr;
         isFunc=false;
         isArray=false;
         multiDec=false;
+        isGlobal=false;
         this->Name=Name;
         this->Type=Type;
     }

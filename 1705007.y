@@ -28,8 +28,8 @@ string current_func;
 int param_count=0;
 int arg_count=0;
 int ret_state=0;
-
-
+int global_flag=1;
+vector<string> global_var_list;
 void yyerror(char *s)
 {
 	
@@ -103,6 +103,14 @@ start: program
 		for(int i=0;i<tempCount;i++){
 			code+="t"+to_string(i)+" dw ?\n";
 		}
+		for(int i=0;i<global_var_list.size();i++){
+			if(table->Lookup(global_var_list[i])->isArray==true){
+				code+=global_var_list[i]+" dw "+to_string(table->Lookup(global_var_list[i])->arraySize)+" dup (?)\n";
+			}
+			else{
+				code+=global_var_list[i]+" dw ?\n";
+			}
+		}
 		code+=".code\njmp main_code\n";
 		string print_func="printf proc\n";
 		print_func+="or ax,ax\njge end_if1\n";
@@ -112,7 +120,8 @@ start: program
 		print_func+="or ax,ax\njne repeat1\n";
 		print_func+="mov ah,2\n";
 		print_func+="print_loop:\npop dx\nor dl,30h\nint 21h\nloop print_loop\n";
-		//print_func+="lea dx,nl\nmov ah,9\nint 21h\n";
+		print_func+="mov dl,0dh\nmov ah,2\nint 21h\n";
+		print_func+="mov dl,0ah\nmov ah,2\nint 21h\n";
 		print_func+="ret\nprintf endp\n";
 		code+=$1->code+"jmp exit\n"+print_func+"exit:\n.exit\n";
 		if(error_count==0){
@@ -162,6 +171,7 @@ unit: var_declaration
 func_start: type_specifier ID LPAREN parameter_list RPAREN
 	{
 		has_param=1;
+		global_flag=0;
 		bool res = table->Insert($2->getName(),"ID");
 		if(!res){
 			if(table->Lookup($2->getName())->isFunc!=true){
@@ -215,6 +225,7 @@ func_start: type_specifier ID LPAREN parameter_list RPAREN
 	| type_specifier ID LPAREN RPAREN
 	{
 		has_param=0;
+		global_flag=0;
 		bool res = table->Insert($2->getName(),"ID");
 		if(!res){
 			if(table->Lookup($2->getName())->isFunc!=true){
@@ -307,6 +318,7 @@ func_definition: func_start compound_statement
 		if(main_proc) main_proc=0;
 		var_list.clear();
 		ret_state=0;
+		global_flag=1;
 	}
  		;				
 
@@ -452,11 +464,17 @@ declaration_list: declaration_list COMMA ID
 			fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,$3->getName().c_str());
 		}
 		else{
-			$$->code="mov ax,0\npush ax\n";
-			current_offset+=2;
-			table->Lookup($3->getName())->offset=2;
-			offset_inc(1);
-			var_list.push_back($3->getName());
+			if(global_flag==1){
+				global_var_list.push_back($3->getName());
+				table->Lookup($3->getName())->isGlobal=true;
+			}
+			else{
+				$$->code="mov ax,0\npush ax\n";
+				current_offset+=2;
+				table->Lookup($3->getName())->offset=2;
+				offset_inc(1);
+				var_list.push_back($3->getName());
+			}
 		}
 		fprintf(fp2,"At line no %d: declaration_list: declaration_list COMMA ID\n\n",yylineno);
 		$$->setName($1->getName()+","+$3->getName());
@@ -472,15 +490,22 @@ declaration_list: declaration_list COMMA ID
 				}
 				else{
 					table->Lookup($3->getName())->isArray=true;
-					string label = newLabel();
-					$$->code+="mov cx,"+$5->getName()+"\n";
-					$$->code+="mov ax,0\n"+label+":\n";
-					$$->code+="push ax\nloop "+label+"\n";
-					current_offset+=2*stoi($5->getName());
-					table->Lookup($3->getName())->offset=2;
-					int cnt=stoi($5->getName());
-					offset_inc(cnt);
-					var_list.push_back($3->getName());
+					if(global_flag==1){
+						global_var_list.push_back($3->getName());
+						table->Lookup($3->getName())->arraySize=stoi($5->getName());
+						table->Lookup($3->getName())->isGlobal=true;
+					}
+					else{
+						string label = newLabel();
+						$$->code+="mov cx,"+$5->getName()+"\n";
+						$$->code+="mov ax,0\n"+label+":\n";
+						$$->code+="push ax\nloop "+label+"\n";
+						current_offset+=2*stoi($5->getName());
+						table->Lookup($3->getName())->offset=2;
+						int cnt=stoi($5->getName());
+						offset_inc(cnt);
+						var_list.push_back($3->getName());
+					}
 				}
 			   	fprintf(fp2,"At line no %d: declaration_list: declaration_list COMMA ID LTHIRD CONST_INT RTHIRD\n\n",yylineno);
 				$$->setName($1->getName()+","+$3->getName()+"["+$5->getName()+"]");
@@ -495,11 +520,17 @@ declaration_list: declaration_list COMMA ID
 					fprintf(fp3,"Error at Line %d: Multiple Declaration of %s\n\n",yylineno,$1->getName().c_str());
 				}
 				else{
-					$$->code="mov ax,0\npush ax\n";
-					current_offset+=2;
-					table->Lookup($1->getName())->offset=2;
-					offset_inc(1);
-					var_list.push_back($1->getName());
+					if(global_flag==1){
+						global_var_list.push_back($1->getName());
+						table->Lookup($1->getName())->isGlobal=true;
+					}
+					else{
+						$$->code="mov ax,0\npush ax\n";
+						current_offset+=2;
+						table->Lookup($1->getName())->offset=2;
+						offset_inc(1);
+						var_list.push_back($1->getName());
+					}
 				}
 			   	fprintf(fp2,"At line no %d: declaration_list: ID\n\n",yylineno);
 				fprintf(fp2,"%s\n\n",$1->getName().c_str());
@@ -515,15 +546,22 @@ declaration_list: declaration_list COMMA ID
 				}
 				else{
 					table->Lookup($1->getName())->isArray=true;
-					string label = newLabel();
-					$$->code+="mov cx,"+$3->getName()+"\n";
-					$$->code+="mov ax,0\n"+label+":\n";
-					$$->code+="push ax\nloop "+label+"\n";
-					current_offset+=2*stoi($3->getName());
-					table->Lookup($1->getName())->offset=2;
-					int cnt=stoi($3->getName());
-					offset_inc(cnt);
-					var_list.push_back($1->getName());
+					if(global_flag==1){
+						global_var_list.push_back($1->getName());
+						table->Lookup($1->getName())->arraySize=stoi($3->getName());
+						table->Lookup($1->getName())->isGlobal=true;
+					}
+					else{
+						string label = newLabel();
+						$$->code+="mov cx,"+$3->getName()+"\n";
+						$$->code+="mov ax,0\n"+label+":\n";
+						$$->code+="push ax\nloop "+label+"\n";
+						current_offset+=2*stoi($3->getName());
+						table->Lookup($1->getName())->offset=2;
+						int cnt=stoi($3->getName());
+						offset_inc(cnt);
+						var_list.push_back($1->getName());
+					}
 				}
 			   	fprintf(fp2,"At line no %d: declaration_list: ID LTHIRD CONST_INT RTHIRD\n\n",yylineno);
 				$$->setName($1->getName()+"["+$3->getName()+"]");
@@ -662,9 +700,15 @@ statement: var_declaration
 		  	fprintf(fp2,"At line no %d: statement: PRINTLN LPAREN ID RPAREN SEMICOLON\n\n",yylineno);
 			$$->setName($1->getName()+"("+$3->getName()+")"+$5->getName());
 			fprintf(fp2,"%s\n\n",$$->getName().c_str());
-			$$->code+="\n;print\npush bp\nmov bp,sp\n";
-			$$->code+="mov ax,[bp+"+to_string(table->Lookup($3->getName())->offset)+"]\n";
-			$$->code+="call printf\npop bp\n";
+			if(table->Lookup($3->getName())->isGlobal==true){
+				$$->code+="\n;print\nmov ax,"+$3->getName()+"\ncall printf\n";
+			}
+			else{
+				$$->code+="\n;print\npush bp\nmov bp,sp\n";
+				$$->code+="mov ax,[bp+"+to_string(table->Lookup($3->getName())->offset)+"]\n";
+				$$->code+="call printf\npop bp\n";
+			}
+			
 			//$$->setSymbol("null");
 			
 	  }
@@ -706,6 +750,7 @@ expression_statement: SEMICOLON
 	  
 variable: ID 	
 {
+	$$->var_id=$1->getName();
 	if(table->Lookup($1->getName())==nullptr){
 		error_count++;
 		fprintf(fp3,"Error at Line %d : Undeclared Variable: %s\n\n",yylineno,$1->getName().c_str());
@@ -720,16 +765,22 @@ variable: ID
 	fprintf(fp2,"At line no %d: variable: ID\n\n",yylineno);
 	fprintf(fp2,"%s\n\n",$1->getName().c_str());
 	$$->offset = table->Lookup($1->getName())->offset;
-
 	string temp = newTemp();
-	$$->code+="\n;var\npush bp\nmov bp,sp\n";
-	$$->code+="mov ax,[bp+"+to_string(table->Lookup($1->getName())->offset+arg_count*2)+"]\n";
-	$$->code+="mov "+temp+",ax\npop bp\n";
+	if(table->Lookup($1->getName())->isGlobal==true){
+		$$->code+="mov ax,"+$1->getName()+"\n";
+		$$->code+="mov "+temp+",ax\n";
+	}
+	else{
+		$$->code+="\n;var\npush bp\nmov bp,sp\n";
+		$$->code+="mov ax,[bp+"+to_string(table->Lookup($1->getName())->offset+arg_count*2)+"]\n";
+		$$->code+="mov "+temp+",ax\npop bp\n";
+	}
 	$$->setSymbol(temp);
-
 }	
 	| ID LTHIRD expression RTHIRD 
 	{
+		$$->var_id=$1->getName();
+		$$->index=$3->getSymbol();
 		if(table->Lookup($1->getName())==nullptr){
 			error_count++;
 			fprintf(fp3,"Error at Line %d : Undeclared Variable: %s\n\n",yylineno,$1->getName().c_str());
@@ -749,11 +800,18 @@ variable: ID
 		int ofst = table->Lookup($1->getName())->offset+arg_count;
 		$$->offset=ofst;
 		string temp = newTemp();
-		$$->code+="\n;var\npush bp\nmov bp,sp\n";
-		$$->code+="mov di,"+to_string(ofst)+"\n";
-		$$->code+="add di,"+$3->getSymbol()+"\n";
-		$$->code+="mov ax,[bp+di]\n";
-		$$->code+="mov "+temp+",ax\npop bp\n";
+		if(table->Lookup($1->getName())->isGlobal==true){
+			$$->code+="mov bx,"+$3->getSymbol()+"\n";
+			$$->code+="mov ax,["+$1->getName()+"+bx]\n";
+			$$->code+="mov "+temp+",ax\n";
+		}
+		else{
+			$$->code+="\n;var\npush bp\nmov bp,sp\n";
+			$$->code+="mov di,"+to_string(ofst)+"\n";
+			$$->code+="add di,"+$3->getSymbol()+"\n";
+			$$->code+="mov ax,[bp+di]\n";
+			$$->code+="mov "+temp+",ax\npop bp\n";
+		}
 		$$->setSymbol(temp);
 
 		fprintf(fp2,"At line no %d: variable: ID LTHIRD expression RTHIRD\n\n",yylineno);
@@ -790,10 +848,22 @@ expression: logic_expression
 			$$->setName($1->getName()+$2->getName()+$3->getName());
 			fprintf(fp2,"%s\n\n",$$->getName().c_str());
 			$$->code=$3->code;
-			$$->code+="\n;var=expr\npush bp\nmov bp,sp\n";
-			$$->code+="mov ax,"+$3->getSymbol()+"\n";
-			$$->code+="mov [bp+"+to_string($1->offset)+"],ax\n";
-			$$->code+="pop bp\n";
+			if(table->Lookup($1->var_id)->isGlobal==true){
+				$$->code+="mov ax,"+$3->getSymbol()+"\n";
+				if(table->Lookup($1->var_id)->isArray==true){
+					$$->code+="mov bx,"+$1->index+"\n";
+					$$->code+="mov ["+$1->var_id+"+bx],ax\n";
+				}
+				else{
+					$$->code+="mov "+$1->var_id+",ax\n";
+				}
+			}
+			else{
+				$$->code+="\n;var=expr\npush bp\nmov bp,sp\n";
+				$$->code+="mov ax,"+$3->getSymbol()+"\n";
+				$$->code+="mov [bp+"+to_string($1->offset)+"],ax\n";
+				$$->code+="pop bp\n";
+			}
 			$$->setSymbol($3->getSymbol());
 	   }	
 	   ;
@@ -1131,17 +1201,39 @@ factor: variable
 		$$->datatype=$1->datatype;
 		$$->setName($1->getName()+$2->getName());
 		fprintf(fp2,"%s\n\n",$$->getName().c_str());
-		$$->code="\n;var incop\npush bp\nmov bp,sp\n";
-		$$->code+="mov ax,[bp+"+to_string($1->offset)+"]\n";
+		string temp = newTemp();
+		if(table->Lookup($1->var_id)->isGlobal==true){
+			if(table->Lookup($1->var_id)->isArray==true){
+				$$->code="mov bx,"+$1->index+"\n";
+				$$->code+="mov ax,["+$1->var_id+"+bx]\n";
+			}
+			else{
+				$$->code="mov ax,"+$1->var_id+"\n";
+			}
+		}
+		else{
+			$$->code="\n;var incop\npush bp\nmov bp,sp\n";
+			$$->code+="mov ax,[bp+"+to_string($1->offset)+"]\n";
+		}
 		if($2->getName()=="++"){
 			$$->code+="add ax,1\n";
 		}
 		else{
 			$$->code+="sub ax,1\n";
 		}
-		string temp = newTemp();
-		$$->code+="mov [bp+"+to_string($1->offset)+"],ax\n";
-		$$->code+="mov "+temp+",ax\npop bp\n";
+		if(table->Lookup($1->var_id)->isGlobal==true){
+			if(table->Lookup($1->var_id)->isArray==true){
+				$$->code="mov bx,"+$1->index+"\n";
+				$$->code+="mov ["+$1->var_id+"+bx],ax\n";
+			}
+			else{
+				$$->code="mov "+$1->var_id+",ax\n";
+			}
+		}
+		else{
+			$$->code+="mov [bp+"+to_string($1->offset)+"],ax\n";
+			$$->code+="mov "+temp+",ax\npop bp\n";
+		}
 		$$->setSymbol(temp);
 	} 
 	| variable DECOP
