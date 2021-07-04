@@ -8,4 +8,8 @@ g++ -w -c -o l.o lex.yy.c
 echo '4'
 g++ -o a.out y.o l.o -lfl
 echo '5'
-./a.out input.txt log.txt error.txt code.asm
+./a.out input.c log.txt error.txt code.asm
+echo '6'
+g++ -o optimizer optimizer.cpp
+echo '7'
+./optimizer

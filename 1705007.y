@@ -99,7 +99,7 @@ start: program
 		fprintf(fp3,"Total Errors: %d",error_count);
 		string code;
 		code = ".model small\n.stack 100h\n.data\n";
-		//code+="nl db 0dh,0ah,\"$\"\n";
+		code+="ret_val dw ?\n";
 		for(int i=0;i<tempCount;i++){
 			code+="t"+to_string(i)+" dw ?\n";
 		}
@@ -719,6 +719,7 @@ statement: var_declaration
 			fprintf(fp2,"%s\n\n",$$->getName().c_str());
 			if(!main_proc){
 				$$->code=$2->code;
+				$$->code+="mov ax,"+$2->getSymbol()+"\nmov ret_val,ax\n";
 				if(current_offset>0||param_count>0){
 					string label = newLabel();
 					$$->code+="mov cx,"+to_string(current_offset/2+param_count)+"\n";
@@ -726,7 +727,8 @@ statement: var_declaration
 					$$->code+="pop ax\nloop "+label+"\n";
 				}
 				$$->code+="ret "+to_string(param_count*2)+"\n";
-				$$->setSymbol($2->getSymbol());
+				//$$->setSymbol($2->getSymbol());
+				$$->setSymbol("ret_val");
 				ret_state=1;
 			}
 	  }
@@ -1136,7 +1138,8 @@ factor: variable
 
 		$$->code=$3->code+"call "+$1->getName()+"\n";
 		string temp=newTemp();
-		$$->code+="mov ax,"+table->Lookup($1->getName())->getSymbol()+"\n";
+		//$$->code+="mov ax,"+table->Lookup($1->getName())->getSymbol()+"\n";
+		$$->code+="mov ax,ret_val\n";
 		$$->code+="mov "+temp+",ax\n";
 		$$->setSymbol(temp);
 		if(table->Lookup($1->getName())==nullptr){
@@ -1214,6 +1217,7 @@ factor: variable
 		else{
 			$$->code="\n;var incop\npush bp\nmov bp,sp\n";
 			$$->code+="mov ax,[bp+"+to_string($1->offset)+"]\n";
+			$$->code+="mov "+temp+",ax\n";
 		}
 		if($2->getName()=="++"){
 			$$->code+="add ax,1\n";
@@ -1232,7 +1236,8 @@ factor: variable
 		}
 		else{
 			$$->code+="mov [bp+"+to_string($1->offset)+"],ax\n";
-			$$->code+="mov "+temp+",ax\npop bp\n";
+			//$$->code+="mov "+temp+",ax\npop bp\n";
+			$$->code+="pop bp\n";
 		}
 		$$->setSymbol(temp);
 	} 
