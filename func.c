@@ -14,6 +14,6 @@ int main(){
     a=1;
     b=2;
     a=g(a,b);
-    println(a);
+    printf(a);
     return 0;
 }

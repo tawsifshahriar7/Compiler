@@ -8,7 +8,7 @@ int main(){
             b++;
         }
     }
-    println(a);
-    println(b);
-    println(c);
+    printf(a);
+    printf(b);
+    printf(c);
 }
